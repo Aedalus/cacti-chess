@@ -8,7 +8,7 @@ type undo struct {
 	posKey uint64
 }
 
-type state struct {
+type State struct {
 	pieces *board120 // Source of truth for pieces
 	side int // white/black
 
@@ -50,4 +50,36 @@ type state struct {
 	// history
 	hisPly uint // how many half moves have been made in the whole game
 	history *[2048]undo
+}
+
+
+
+// GenPosKey generates a statistically unique uint64
+// key for the current state of the board
+func (s State) GenPosKey() uint64 {
+	var finalKey uint64 = 0
+	var p piece = piece(0)
+
+	// pieces
+	for sq := 0; sq < BOARD_SQ_NUMBER; sq++ {
+		p = s.pieces[sq]
+		if p != NO_SQ && p != EMPTY {
+			finalKey ^= hashPieceKeys[p][sq]
+		}
+	}
+
+	// side
+	if s.side == WHITE {
+		finalKey ^= hashSideKey
+	}
+
+	// enPas
+	if s.enPas != NO_SQ {
+		finalKey ^= hashPieceKeys[EMPTY][s.enPas]
+	}
+
+	// castle keys
+	finalKey ^= hashCastleKeys[s.castlePerm.val]
+
+	return finalKey
 }

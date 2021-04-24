@@ -41,3 +41,22 @@ func TestCastlePerm_Clear(t *testing.T) {
 	p.Clear(CASTLE_PERMS_ALL)
 	assert.Equal(t, 0, p.val)
 }
+
+func TestCastlePerm_Has(t *testing.T) {
+	p := &castlePerm{}
+	assert.Equal(t, &castlePerm{0}, p)
+
+	p.Set(CASTLE_PERMS_WK)
+	assert.True(t, p.Has(CASTLE_PERMS_WK))
+	assert.False(t, p.Has(CASTLE_PERMS_WQ))
+	assert.False(t, p.Has(CASTLE_PERMS_BK))
+	assert.False(t, p.Has(CASTLE_PERMS_BQ))
+	assert.False(t, p.Has(CASTLE_PERMS_ALL))
+
+	p.Set(CASTLE_PERMS_ALL)
+	assert.True(t, p.Has(CASTLE_PERMS_WK))
+	assert.True(t, p.Has(CASTLE_PERMS_WQ))
+	assert.True(t, p.Has(CASTLE_PERMS_BK))
+	assert.True(t, p.Has(CASTLE_PERMS_BQ))
+	assert.True(t, p.Has(CASTLE_PERMS_ALL))
+}
