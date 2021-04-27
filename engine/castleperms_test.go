@@ -1,4 +1,4 @@
-package board
+package engine
 
 import (
 	"github.com/stretchr/testify/assert"

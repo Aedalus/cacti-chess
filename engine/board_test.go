@@ -1,14 +1,13 @@
-package board
+package engine
 
 import (
-	"fmt"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestMappingBoards(t *testing.T) {
 	// spot check some of the mapping
-	t.Run("the 120 board maps correctly", func(t *testing.T) {
+	t.Run("the 120 engine maps correctly", func(t *testing.T) {
 		// borders should all be 01
 		assert.Equal(t, -1, sq120to64[0])
 		assert.Equal(t, -1, sq120to64[9])
@@ -32,7 +31,7 @@ func TestMappingBoards(t *testing.T) {
 		assert.Equal(t, 63, sq120to64[98])
 	})
 
-	t.Run("the 64 board maps correctly", func(t *testing.T) {
+	t.Run("the 64 engine maps correctly", func(t *testing.T) {
 		// first rank
 		assert.Equal(t, 21, sq64to120[0])
 		assert.Equal(t, 28, sq64to120[7])
@@ -87,8 +86,8 @@ func TestBitboard64(t *testing.T) {
 	})
 }
 
-func TestBitboard64_String(t *testing.T) {
-	b := &bitboard64{}
-	b.set(sq120to64[21])
-	fmt.Println(b)
-}
+//func TestBitboard64_String(t *testing.T) {
+//	b := &bitboard64{}
+//	b.set(sq120to64[21])
+//	fmt.Println(b)
+//}
