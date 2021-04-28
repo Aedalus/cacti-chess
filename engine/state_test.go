@@ -157,3 +157,12 @@ func TestUpdateListsMaterial(t *testing.T) {
 		21, 28, 0, 0, 0, 0, 0, 0, 0, 0,
 	}, state.pieceList[wR])
 }
+
+func TestAssertCache(t *testing.T) {
+	fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQKq - 0 1"
+	state, err := parseFen(fen)
+	assert.Nil(t, err)
+
+	state.updateListCaches()
+	state.assertCache()
+}

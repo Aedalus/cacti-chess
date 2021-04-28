@@ -8,7 +8,8 @@ import (
 
 //"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-func parseFen(fen string) (*State, error) {
+// ParseFen parses a fen string and returns the corresponding board
+func ParseFen(fen string) (*State, error) {
 	fenPieces := strings.Split(fen, " ")
 	if len(fenPieces) != 6 {
 		return nil, fmt.Errorf("fen should have 6 parts")

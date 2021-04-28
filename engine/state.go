@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 )
 
@@ -115,7 +116,104 @@ func (s *State) updateListCaches() {
 			if piece == bK {
 				s.kingSq[BLACK] = i
 			}
+
+			// update pawn boards
+			if piece == wP {
+				s.pawns[WHITE].set(SQ64(i))
+				s.pawns[BOTH].set(SQ64(i))
+			}
+			if piece == bP {
+				s.pawns[BLACK].set(SQ64(i))
+				s.pawns[BOTH].set(SQ64(i))
+			}
 		}
+	}
+}
+
+// will panic if the cache isn't right. used for debugging
+func (s *State) assertCache() {
+	// temporary values we recompute to check against
+	t_pieceCount := [13]int{}
+	t_pieceList := [13][10]int{}
+	t_bigPieceCount := [2]int{}
+	t_majPieceCount := [2]int{}
+	t_minPieceCount := [2]int{}
+	t_kingSq := [2]int{}
+	t_materialCount := [2]int{}
+
+	t_pawns := [3]*bitboard64{
+		&bitboard64{},
+		&bitboard64{},
+		&bitboard64{},
+	}
+
+	for i := 0; i < BOARD_SQ_NUMBER; i++ {
+		p := s.pieces[i]
+		if p != NO_SQ && p != EMPTY {
+			color := pieceColorMap[p]
+			if pieceBigMap[p] {
+				t_bigPieceCount[color]++
+			}
+			if pieceMajorMap[p] {
+				t_majPieceCount[color]++
+			}
+			if pieceMinorMap[p] {
+				t_minPieceCount[color]++
+			}
+
+			t_materialCount[color] += pieceValueMap[p]
+
+			// update the pieceList, then increment the counter
+			// conceptually like
+			// [wP][0] = A2
+			// [wP][1] = B2 etc
+			curPieceCount := t_pieceCount[p]
+			t_pieceList[p][curPieceCount] = i
+			t_pieceCount[p]++
+
+			// update king positions
+			if p == wK {
+				t_kingSq[WHITE] = i
+			}
+			if p == bK {
+				t_kingSq[BLACK] = i
+			}
+
+			// update pawn boards
+			if p == wP {
+				t_pawns[WHITE].set(SQ64(i))
+				t_pawns[BOTH].set(SQ64(i))
+			}
+			if p == bP {
+				t_pawns[BLACK].set(SQ64(i))
+				t_pawns[BOTH].set(SQ64(i))
+			}
+		}
+	}
+
+	if !reflect.DeepEqual(t_pieceCount, s.pieceCount) {
+		panic(fmt.Errorf("pieceCount - got %v, want %v", s.pieceCount, t_pieceCount))
+	}
+	if !reflect.DeepEqual(t_pieceList, s.pieceList) {
+		panic(fmt.Errorf("pieceList - got %v, want %v", s.pieceList, t_pieceList))
+	}
+	if !reflect.DeepEqual(t_bigPieceCount, s.bigPieceCount) {
+		panic(fmt.Errorf("bigPieceCount - got %v, want %v", s.bigPieceCount, t_bigPieceCount))
+	}
+	if !reflect.DeepEqual(t_majPieceCount, s.majPieceCount) {
+		panic(fmt.Errorf("majPieceCount - got %v want %v", s.majPieceCount, t_majPieceCount))
+	}
+	if !reflect.DeepEqual(t_minPieceCount, s.minPieceCount) {
+		panic(fmt.Errorf("minPieceCount - got %v want %v", s.minPieceCount, t_minPieceCount))
+	}
+	if !reflect.DeepEqual(t_kingSq, s.kingSq) {
+		panic(fmt.Errorf("kingSq - got %v want %v", s.kingSq, t_kingSq))
+	}
+	if !reflect.DeepEqual(t_materialCount, s.materialCount) {
+		panic(fmt.Errorf("materialCount - got %v want %v", s.materialCount, t_materialCount))
+	}
+	if !reflect.DeepEqual(t_pawns, s.pawns) {
+		panic(fmt.Errorf("pawns - got %v want %v", s.pawns, t_pawns))
 	}
 }
 
@@ -161,6 +259,77 @@ func (s *State) Reset() {
 	s.posKey = 0
 }
 
+func (s *State) IsSquareAttacked(sq, attackingColor int) bool {
+	// pawns
+	if attackingColor == WHITE {
+		if s.pieces[sq-11] == wP || s.pieces[sq-9] == wP {
+			return true
+		}
+	} else {
+		if s.pieces[sq+11] == bP || s.pieces[sq+9] == bP {
+			return true
+		}
+	}
+
+	// knights
+	for _, n := range dirKnight { // has the offsets for the knight jumps
+		kSq := sq + n
+		if attackingColor == WHITE && s.pieces[kSq] == wN {
+			return true
+		} else if attackingColor == BLACK && s.pieces[kSq] == bN {
+			return true
+		}
+	}
+
+	// rook/queen
+	for _, dir := range dirRook {
+		tsq := sq + dir
+		p := s.pieces[tsq]
+		// only go until we're off the board
+		for p != NO_SQ {
+			if p != EMPTY {
+				if isRookOrQueen[p] && pieceColorMap[p] == attackingColor {
+					return true
+				}
+				break // break out if we hit something that wasn't a rook or queen
+			}
+			tsq += dir // move to the next square
+			p = s.pieces[tsq]
+		}
+	}
+
+	// bishop/queen
+	for _, dir := range dirBishop {
+		tsq := sq + dir
+		p := s.pieces[tsq]
+		// only go until we're off the board
+		for p != NO_SQ {
+			if p != EMPTY {
+				if isBishopOrQueen[p] && pieceColorMap[p] == attackingColor {
+					return true
+				}
+				break // break out if we hit something else
+			}
+			tsq += dir // move to the next square
+			p = s.pieces[tsq]
+		}
+	}
+
+	for _, dir := range dirKing {
+		tsq := sq + dir
+		p := s.pieces[tsq]
+		if p == wK && attackingColor == WHITE {
+			return true
+		}
+		if p == bK && attackingColor == BLACK {
+			return true
+		}
+	}
+
+	// only return false once we've ruled out everything
+	return false
+}
+
 func (s State) String() string {
 	output := strings.Builder{}
 	output.WriteString(s.PrintBoard())
@@ -179,6 +348,25 @@ func (s State) PrintBoard() string {
 			sq := fileRankToSq(int(f), int(r))
 			piece := s.pieces[sq]
 			output.WriteString(piece.String())
+		}
+		output.WriteString("\n")
+	}
+	return output.String()
+}
+
+// PrintSQsAttackedBySide returns a string representation
+// of all squares attacked by a given side
+func (s State) PrintAttackBoard(attackingSide int) string {
+	output := strings.Builder{}
+
+	for r := RANK_8; r >= RANK_1; r-- {
+		for f := FILE_A; f <= FILE_H; f++ {
+			sq := fileRankToSq(f, r)
+			if s.IsSquareAttacked(sq, attackingSide) {
+				output.WriteString("X")
+			} else {
+				output.WriteString("-")
+			}
 		}
 		output.WriteString("\n")
 	}
