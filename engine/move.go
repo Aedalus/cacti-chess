@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+
+
 /*
 The movekey condenses all the information
 about a player's move into 64 bits
