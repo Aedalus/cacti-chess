@@ -2,6 +2,7 @@ package engine
 
 type piece int8
 
+const PIECE_COUNT = 13
 const (
 	EMPTY piece = iota
 	wP

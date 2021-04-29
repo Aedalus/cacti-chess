@@ -125,7 +125,7 @@ func TestState_Reset(t *testing.T) {
 
 func TestState_String(t *testing.T) {
 	fen := "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2"
-	state, err := parseFen(fen)
+	state, err := ParseFen(fen)
 
 	assert.Nil(t, err)
 	fmt.Println(state)
@@ -133,7 +133,7 @@ func TestState_String(t *testing.T) {
 
 func TestUpdateListsMaterial(t *testing.T) {
 	fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-	state, err := parseFen(fen)
+	state, err := ParseFen(fen)
 
 	assert.Nil(t, err)
 
@@ -160,7 +160,7 @@ func TestUpdateListsMaterial(t *testing.T) {
 
 func TestAssertCache(t *testing.T) {
 	fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQKq - 0 1"
-	state, err := parseFen(fen)
+	state, err := ParseFen(fen)
 	assert.Nil(t, err)
 
 	state.updateListCaches()

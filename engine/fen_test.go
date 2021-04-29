@@ -70,7 +70,7 @@ func TestParseCastlePerms(t *testing.T) {
 func TestParseFen(t *testing.T) {
 	t.Run("it can parse a starting position", func(t *testing.T) {
 		fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-		state, err := parseFen(fen)
+		state, err := ParseFen(fen)
 
 		assert.Nil(t, err)
 		assert.Equal(t, WHITE, state.side)

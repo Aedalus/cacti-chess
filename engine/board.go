@@ -1,6 +1,8 @@
 package engine
 
-import "strings"
+import (
+	"strings"
+)
 
 /**
 A 120 engine has margins around the edges to help
@@ -70,6 +72,8 @@ func (b bitboard64) Count() int {
 func fileRankToSq(file int, rank int) int {
 	return (21 + file) + (rank * 10)
 }
+
+
 
 func (b bitboard64) String() string {
 	str := strings.Builder{}
