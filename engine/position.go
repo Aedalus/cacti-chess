@@ -14,14 +14,7 @@ type undo struct {
 	posKey     uint64
 }
 
-// NewState returns a freshly initialized state
-func NewState() *State {
-	s := &State{}
-	s.Reset()
-	return s
-}
-
-type State struct {
+type Position struct {
 	pieces *board120 // Source of truth for pieces
 	side   int       // white/black
 
@@ -56,7 +49,7 @@ type State struct {
 
 // GenPosKey generates a statistically unique uint64
 // key for the current state of the engine
-func (s State) GenPosKey() uint64 {
+func (s Position) GenPosKey() uint64 {
 	var finalKey uint64 = 0
 	var p piece = piece(0)
 
@@ -84,7 +77,7 @@ func (s State) GenPosKey() uint64 {
 	return finalKey
 }
 
-func (s *State) updateListCaches() {
+func (s *Position) updateListCaches() {
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
 		piece := s.pieces[i]
 		if piece != NO_SQ && piece != EMPTY {
@@ -131,7 +124,7 @@ func (s *State) updateListCaches() {
 }
 
 // will panic if the cache isn't right. used for debugging
-func (s *State) assertCache() {
+func (s *Position) assertCache() {
 	// temporary values we recompute to check against
 	t_pieceCount := [13]int{}
 	t_pieceList := [13][10]int{}
@@ -218,7 +211,7 @@ func (s *State) assertCache() {
 }
 
 // Reset will re-initialize the engine to an empty state
-func (s *State) Reset() {
+func (s *Position) Reset() {
 	// initialize piece array
 	s.pieces = &board120{}
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
@@ -259,7 +252,17 @@ func (s *State) Reset() {
 	s.posKey = 0
 }
 
-func (s *State) IsSquareAttacked(sq, attackingColor int) bool {
+func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
+
+	// todo - delete these asserts for optimization
+	if fileLookups[sq] == NO_SQ {
+		panic(fmt.Errorf("invalid square: %v", sq))
+	}
+	if attackingColor != WHITE && attackingColor != BLACK {
+		panic(fmt.Errorf("unexpected color: %v", attackingColor))
+	}
+	s.assertCache()
+
 	// pawns
 	if attackingColor == WHITE {
 		if s.pieces[sq-11] == wP || s.pieces[sq-9] == wP {
@@ -330,7 +333,7 @@ func (s *State) IsSquareAttacked(sq, attackingColor int) bool {
 	return false
 }
 
-func (s State) String() string {
+func (s Position) String() string {
 	output := strings.Builder{}
 	output.WriteString(s.PrintBoard())
 	output.WriteString("--------\n")
@@ -341,7 +344,7 @@ func (s State) String() string {
 
 	return output.String()
 }
-func (s State) PrintBoard() string {
+func (s Position) PrintBoard() string {
 	output := strings.Builder{}
 	for r := RANK_8; r >= RANK_1; r-- {
 		for f := FILE_A; f <= FILE_H; f++ {
@@ -356,7 +359,7 @@ func (s State) PrintBoard() string {
 
 // PrintSQsAttackedBySide returns a string representation
 // of all squares attacked by a given side
-func (s State) PrintAttackBoard(attackingSide int) string {
+func (s Position) PrintAttackBoard(attackingSide int) string {
 	output := strings.Builder{}
 
 	for r := RANK_8; r >= RANK_1; r-- {

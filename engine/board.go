@@ -73,7 +73,10 @@ func fileRankToSq(file int, rank int) int {
 	return (21 + file) + (rank * 10)
 }
 
-
+// todo - turn this into a map lookup
+func sqOffBoard(sq int) bool {
+	return fileLookups[sq] == NO_SQ
+}
 
 func (b bitboard64) String() string {
 	str := strings.Builder{}

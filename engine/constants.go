@@ -131,6 +131,7 @@ var hashCastleKeys [16]uint64                 // castleKeys
 
 // used for lookups of rank/file quickly given a board number
 // i.e. rankLookups[21] = 1, fileLookups = 1 (A1)
+// NO_SQ if not on the core 8x8
 var rankLookups [BOARD_SQ_NUMBER]int
 var fileLookups [BOARD_SQ_NUMBER]int
 
@@ -149,6 +150,11 @@ func init() {
 	}
 
 	// initialize the rank/file lookups
+	for i := 0; i < BOARD_SQ_NUMBER; i++ {
+		rankLookups[i] = NO_SQ
+		fileLookups[i] = NO_SQ
+	}
+
 	for r := RANK_1; r <= RANK_8; r++ {
 		for f := FILE_A; f <= FILE_H; f++ {
 			sq120 := fileRankToSq(f, r)

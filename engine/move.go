@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-
-
 /*
 The movekey condenses all the information
 about a player's move into 64 bits
@@ -27,6 +25,42 @@ Hexidecimal is easier to count
 */
 type movekey struct {
 	val uint64
+}
+
+func newMovekey(from, to int, captured, promoted piece, enPas, pawnStart bool) *movekey {
+	k := &movekey{}
+
+	k.setFrom(from)
+	k.setTo(to)
+	k.setCaptured(captured)
+	k.setPromoted(promoted)
+
+	if enPas {
+		k.setEnPas()
+	}
+
+	if pawnStart {
+		k.setPawnStart()
+	}
+
+	return k
+}
+
+func (m *movekey) ShortString() string {
+	str := fmt.Sprintf("%s%s", printSq(m.getFrom()), printSq(m.getTo()))
+	if m.getPromoted() != EMPTY {
+		switch m.getPromoted() {
+		case wR, bR:
+			str += "r"
+		case wB, bB:
+			str += "b"
+		case wN, bN:
+			str += "n"
+		case wQ, bQ:
+			str += "q"
+		}
+	}
+	return str
 }
 
 func (m *movekey) String() string {

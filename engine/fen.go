@@ -9,13 +9,13 @@ import (
 //"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
 // ParseFen parses a fen string and returns the corresponding board
-func ParseFen(fen string) (*State, error) {
+func ParseFen(fen string) (*Position, error) {
 	fenPieces := strings.Split(fen, " ")
 	if len(fenPieces) != 6 {
 		return nil, fmt.Errorf("fen should have 6 parts")
 	}
 
-	state := &State{}
+	state := &Position{}
 	state.Reset()
 
 	// pieces
@@ -68,6 +68,7 @@ func ParseFen(fen string) (*State, error) {
 
 	// posKey
 	state.posKey = state.GenPosKey()
+	state.updateListCaches()
 	return state, nil
 }
 
