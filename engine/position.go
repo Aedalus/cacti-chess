@@ -81,18 +81,18 @@ func (s *Position) updateListCaches() {
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
 		piece := s.pieces[i]
 		if piece != NO_SQ && piece != EMPTY {
-			color := pieceColorMap[piece]
-			if pieceBigMap[piece] {
+			color := pieceLookups[piece].color
+			if pieceLookups[piece].isBig {
 				s.bigPieceCount[color]++
 			}
-			if pieceMajorMap[piece] {
+			if pieceLookups[piece].isMajor {
 				s.majPieceCount[color]++
 			}
-			if pieceMinorMap[piece] {
+			if pieceLookups[piece].isMinor {
 				s.minPieceCount[color]++
 			}
 
-			s.materialCount[color] += pieceValueMap[piece]
+			s.materialCount[color] += pieceLookups[piece].value
 
 			// update the pieceList, then increment the counter
 			// conceptually like
@@ -143,18 +143,18 @@ func (s *Position) assertCache() {
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
 		p := s.pieces[i]
 		if p != NO_SQ && p != EMPTY {
-			color := pieceColorMap[p]
-			if pieceBigMap[p] {
+			color := pieceLookups[p].color
+			if pieceLookups[p].isBig {
 				t_bigPieceCount[color]++
 			}
-			if pieceMajorMap[p] {
+			if pieceLookups[p].isMajor {
 				t_majPieceCount[color]++
 			}
-			if pieceMinorMap[p] {
+			if pieceLookups[p].isMinor {
 				t_minPieceCount[color]++
 			}
 
-			t_materialCount[color] += pieceValueMap[p]
+			t_materialCount[color] += pieceLookups[p].value
 
 			// update the pieceList, then increment the counter
 			// conceptually like
@@ -291,7 +291,7 @@ func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
 		// only go until we're off the board
 		for p != NO_SQ {
 			if p != EMPTY {
-				if isRookOrQueen[p] && pieceColorMap[p] == attackingColor {
+				if pieceLookups[p].isRookOrQueen && pieceLookups[p].color == attackingColor {
 					return true
 				}
 				break // break out if we hit something that wasn't a rook or queen
@@ -308,7 +308,7 @@ func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
 		// only go until we're off the board
 		for p != NO_SQ {
 			if p != EMPTY {
-				if isBishopOrQueen[p] && pieceColorMap[p] == attackingColor {
+				if pieceLookups[p].isBishopOrQueen && pieceLookups[p].color == attackingColor {
 					return true
 				}
 				break // break out if we hit something else

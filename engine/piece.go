@@ -19,90 +19,115 @@ const (
 	bK
 )
 
-// everything but pawns and empty should be big
-var pieceBigMap = map[piece]bool{
-	EMPTY: false,
-	wP:    false,
-	wN:    true,
-	wB:    true,
-	wR:    true,
-	wQ:    true,
-	wK:    true,
-	bP:    false,
-	bN:    true,
-	bB:    true,
-	bR:    true,
-	bQ:    true,
-	bK:    true,
+type pieceMetadata struct {
+	isBig           bool  // everything but pawns + empty
+	isMajor         bool  // rooks, queens, kings
+	isMinor         bool  // bishops, knights
+	value           int   // material value
+	color           int   // WHITE, BLACK, BOTH
+	slides          bool  // bishop/rook/queen
+	isRookOrQueen   bool  // if it's a rook or queen
+	isBishopOrQueen bool  // if it's a bishop or queen
+	dir             []int // movement directions
 }
 
-// returns if a piece is major (rook/king/queen)
-var pieceMajorMap = map[piece]bool{
-
-	EMPTY: false,
-	wP:    false,
-	wN:    false,
-	wB:    false,
-	wR:    true,
-	wQ:    true,
-	wK:    true,
-	bP:    false,
-	bN:    false,
-	bB:    false,
-	bR:    true,
-	bQ:    true,
-	bK:    true,
-}
-
-// returns if a piece is minor (bishop/knight)
-var pieceMinorMap = map[piece]bool{
-
-	EMPTY: false,
-	wP:    false,
-	wN:    true,
-	wB:    true,
-	wR:    false,
-	wQ:    false,
-	wK:    false,
-	bP:    false,
-	bN:    true,
-	bB:    true,
-	bR:    false,
-	bQ:    false,
-	bK:    false,
-}
-
-// returns the value of a piece
-var pieceValueMap = map[piece]int{
-	EMPTY: 0,
-	wP:    100,
-	wN:    325,
-	wB:    335,
-	wR:    550,
-	wQ:    1000,
-	wK:    50000,
-	bP:    100,
-	bN:    325,
-	bB:    335,
-	bR:    550,
-	bQ:    1000,
-	bK:    50000,
-}
-
-var pieceColorMap = map[piece]int{
-	EMPTY: BOTH,
-	wP:    WHITE,
-	wN:    WHITE,
-	wB:    WHITE,
-	wR:    WHITE,
-	wQ:    WHITE,
-	wK:    WHITE,
-	bP:    BLACK,
-	bN:    BLACK,
-	bB:    BLACK,
-	bR:    BLACK,
-	bQ:    BLACK,
-	bK:    BLACK,
+// used for fast lookups without calling functions
+var pieceLookups = map[piece]pieceMetadata{
+	EMPTY: {
+		color: BOTH,
+	},
+	wP: {
+		color: WHITE,
+		value: 100,
+	},
+	wN: {
+		color:   WHITE,
+		isBig:   true,
+		isMinor: true,
+		value:   325,
+		dir:     []int{-8, -19, -21, -12, 8, 19, 21, 12},
+	},
+	wB: {
+		color:           WHITE,
+		isBig:           true,
+		isMinor:         true,
+		value:           330,
+		slides:          true,
+		isBishopOrQueen: true,
+		dir:             []int{-9, -11, 9, 11},
+	},
+	wR: {
+		color:         WHITE,
+		isBig:         true,
+		isMajor:       true,
+		value:         550,
+		slides:        true,
+		isRookOrQueen: true,
+		dir:           []int{-1, -10, 1, 10},
+	},
+	wQ: {
+		color:           WHITE,
+		isBig:           true,
+		isMajor:         true,
+		value:           1000,
+		slides:          true,
+		isRookOrQueen:   true,
+		isBishopOrQueen: true,
+		dir:             []int{-1, -10, 1, 10, -9, -11, 11, 9},
+	},
+	wK: {
+		color:   WHITE,
+		isBig:   true,
+		isMajor: true,
+		value:   50000,
+		dir:     []int{-1, -10, 1, 10, -9, -11, 11, 9},
+	},
+	bP: {
+		color: BLACK,
+		value: 100,
+	},
+	bN: {
+		color:   BLACK,
+		isBig:   true,
+		isMinor: true,
+		value:   325,
+		dir:     []int{-8, -19, -21, -12, 8, 19, 21, 12},
+	},
+	bB: {
+		color:           BLACK,
+		isBig:           true,
+		isMinor:         true,
+		value:           330,
+		slides:          true,
+		isBishopOrQueen: true,
+		dir:             []int{-9, -11, 9, 11},
+	},
+	bR: {
+		color:         BLACK,
+		isBig:         true,
+		isMajor:       true,
+		value:         550,
+		slides:        true,
+		isRookOrQueen: true,
+		dir:           []int{-1, -10, 1, 10},
+	},
+	bQ: {
+		color:           BLACK,
+		isBig:           true,
+		isMajor:         true,
+		value:           1000,
+		slides:          true,
+		isRookOrQueen:   true,
+		isBishopOrQueen: true,
+		dir:             []int{-1, -10, 1, 10, -9, -11, 11, 9},
+	},
+	bK: {
+		color:   BLACK,
+		isBig:   true,
+		isMajor: true,
+		value:   50000,
+		dir:     []int{-1, -10, 1, 10, -9, -11, 11, 9},
+	},
 }
 
 func (p piece) String() string {
@@ -136,76 +161,4 @@ func (p piece) String() string {
 	default:
 		return "UNKNOWN"
 	}
-}
-
-// if a piece is a knight
-//var isKnight = map[piece]bool{
-//
-//	EMPTY: false,
-//	wP:    false,
-//	wN:    true,
-//	wB:    false,
-//	wR:    false,
-//	wQ:    false,
-//	wK:    false,
-//	bP:    false,
-//	bN:    true,
-//	bB:    false,
-//	bR:    false,
-//	bQ:    false,
-//	bK:    false,
-//}
-
-// returns if a piece is a king
-//var isKing = map[piece]bool{
-//
-//	EMPTY: false,
-//	wP:    false,
-//	wN:    false,
-//	wB:    false,
-//	wR:    false,
-//	wQ:    false,
-//	wK:    true,
-//	bP:    false,
-//	bN:    false,
-//	bB:    false,
-//	bR:    false,
-//	bQ:    false,
-//	bK:    true,
-//}
-
-// returns if a piece is a rook/queen
-var isRookOrQueen = map[piece]bool{
-
-	EMPTY: false,
-	wP:    false,
-	wN:    false,
-	wB:    false,
-	wR:    true,
-	wQ:    true,
-	wK:    false,
-	bP:    false,
-	bN:    false,
-	bB:    false,
-	bR:    true,
-	bQ:    true,
-	bK:    false,
-}
-
-// returns if a piece is a bishop/queen
-var isBishopOrQueen = map[piece]bool{
-
-	EMPTY: false,
-	wP:    false,
-	wN:    false,
-	wB:    true,
-	wR:    false,
-	wQ:    true,
-	wK:    false,
-	bP:    false,
-	bN:    false,
-	bB:    true,
-	bR:    false,
-	bQ:    true,
-	bK:    false,
 }

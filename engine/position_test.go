@@ -140,7 +140,7 @@ func TestUpdateListsMaterial(t *testing.T) {
 	assert.Equal(t, [2]int{8, 8}, state.bigPieceCount)
 	assert.Equal(t, [2]int{4, 4}, state.majPieceCount)
 	assert.Equal(t, [2]int{4, 4}, state.minPieceCount)
-	assert.Equal(t, [2]int{54220, 54220}, state.materialCount)
+	assert.Equal(t, [2]int{54210, 54210}, state.materialCount)
 
 	// check piece counts empty, wP, wB, wN, etc
 	assert.Equal(t, [13]int{
