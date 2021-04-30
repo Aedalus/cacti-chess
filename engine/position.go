@@ -7,10 +7,10 @@ import (
 )
 
 type undo struct {
-	move       int
-	castlePerm castlePerm
-	enPas      uint
-	fiftyMove  uint
+	move       movekey
+	castlePerm *castlePerm
+	enPas      int
+	fiftyMove  int
 	posKey     uint64
 }
 
@@ -43,8 +43,8 @@ type Position struct {
 	materialCount [2]int  // count of material
 
 	// history
-	halfMoveCount int // how many half moves have been made in the whole game
-	history       *[2048]undo
+	hisPly  int // how many half moves have been made in the whole game
+	history *[2048]undo
 }
 
 // GenPosKey generates a statistically unique uint64
@@ -133,6 +133,7 @@ func (p *Position) assertCache() {
 	t_minPieceCount := [2]int{}
 	t_kingSq := [2]int{}
 	t_materialCount := [2]int{}
+	t_posKey := p.GenPosKey()
 
 	t_pawns := [3]*bitboard64{
 		&bitboard64{},
@@ -208,6 +209,9 @@ func (p *Position) assertCache() {
 	if !reflect.DeepEqual(t_pawns, p.pawns) {
 		panic(fmt.Errorf("pawns - got %v want %v", p.pawns, t_pawns))
 	}
+	if p.posKey != t_posKey {
+		panic(fmt.Errorf("posKey - got %v want %v", p.posKey, t_posKey))
+	}
 }
 
 // Reset will re-initialize the engine to an empty state
@@ -247,7 +251,7 @@ func (p *Position) Reset() {
 	p.enPas = NO_SQ
 	p.fiftyMove = 0
 	p.searchPly = 0
-	p.halfMoveCount = 0
+	p.hisPly = 0
 	p.history = &[2048]undo{}
 	p.posKey = 0
 }

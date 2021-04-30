@@ -61,9 +61,9 @@ func ParseFen(fen string) (*Position, error) {
 		return nil, fmt.Errorf("error parsing fullmoveStr: %v", err)
 	}
 
-	state.halfMoveCount = fullmovesCount / 2
+	state.hisPly = fullmovesCount / 2
 	if state.side == BLACK {
-		state.halfMoveCount++
+		state.hisPly++
 	}
 
 	// posKey

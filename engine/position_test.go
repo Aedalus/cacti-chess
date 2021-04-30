@@ -97,7 +97,7 @@ func TestPosition_Reset(t *testing.T) {
 		majPieceCount: [2]int{},
 		minPieceCount: [2]int{},
 		materialCount: [2]int{},
-		halfMoveCount: 0,
+		hisPly:        0,
 		history:       &[2048]undo{},
 	}
 	sample := &Position{
@@ -116,7 +116,7 @@ func TestPosition_Reset(t *testing.T) {
 		majPieceCount: [2]int{1, 1},
 		minPieceCount: [2]int{1, 1},
 		materialCount: [2]int{1, 1},
-		halfMoveCount: 70,
+		hisPly:        70,
 		history:       &[2048]undo{},
 	}
 	sample.Reset()

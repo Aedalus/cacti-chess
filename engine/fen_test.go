@@ -77,7 +77,7 @@ func TestParseFen(t *testing.T) {
 		assert.Equal(t, &castlePerm{val: CASTLE_PERMS_ALL}, state.castlePerm)
 		assert.Equal(t, -1, state.enPas)
 		assert.Equal(t, 0, state.fiftyMove)
-		assert.Equal(t, 0, state.halfMoveCount)
+		assert.Equal(t, 0, state.hisPly)
 
 		want := &board120{
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,

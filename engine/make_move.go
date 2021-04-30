@@ -20,6 +20,8 @@ Making a move...
 13. change side, increment ply + hisPly
 */
 
+// hash keys?
+
 // clear a single sq from the position
 func (p *Position) clearPiece(sq int) {
 	if sqOffBoard(sq) {
@@ -66,4 +68,257 @@ func (p *Position) clearPiece(sq int) {
 	p.pieceList[pce][p.pieceCount[pce]] = 0
 	// decrement the total piece count to match
 	p.pieceCount[pce]--
+}
+
+func (p *Position) addPiece(sq int, pce piece) {
+
+	pceMeta := pieceLookups[pce]
+
+	if pceMeta.isBig {
+		p.bigPieceCount[pceMeta.color]++
+		if pceMeta.isMajor {
+			p.majPieceCount[pceMeta.color]++
+		} else if pceMeta.isMinor {
+			p.minPieceCount[pceMeta.color]++
+		}
+	} else {
+		p.pawns[pceMeta.color].set(sq)
+		p.pawns[BOTH].set(sq)
+	}
+
+	// add value
+	p.materialCount[pceMeta.color] += pceMeta.value
+
+	// update pieceLists
+	p.pieceCount[pce]++
+	p.pieceList[pce][p.pieceCount[pce]] = sq
+}
+
+func (p *Position) movePiece(from, to int) {
+	pce := p.pieces[from]
+	pceMeta := pieceLookups[pce]
+
+	p.pieces[from] = EMPTY
+	p.pieces[to] = pce
+
+	// update the pawn boards as needed
+	if !pceMeta.isBig {
+		p.pawns[pceMeta.color].clear(SQ64(from))
+		p.pawns[BOTH].clear(SQ64(from))
+		p.pawns[pceMeta.color].set(SQ64(to))
+		p.pawns[BOTH].set(SQ64(to))
+	}
+
+	found := false
+	for i := 0; i < p.pieceCount[pce]; i++ {
+		if p.pieceList[pce][i] == from {
+			p.pieceList[pce][i] = to
+			found = true
+		}
+	}
+
+	// todo - eliminate after perft
+	if !found {
+		panic("didnt find existing piece")
+	}
+}
+
+// MakeMove updates the position for a newly made
+// move. It returns false if a king is left in check.
+func (p *Position) MakeMove(move movekey) bool {
+	p.assertCache()
+
+	from := move.getFrom()
+	to := move.getTo()
+	side := p.side
+	captured := move.getCaptured()
+	promoted := move.getPromoted()
+	pce := p.pieces[from]
+
+	p.history[p.hisPly].posKey = p.posKey
+	p.hisPly++
+
+	// enPas need to remove an additional piece
+	if move.isEnPas() {
+		if side == WHITE {
+			p.clearPiece(to - 10)
+		} else {
+			p.clearPiece(to + 10)
+		}
+	}
+
+	// castling
+	if move.isCastle() {
+		switch to {
+		case C1: // white queenside
+			p.movePiece(A1, D1)
+		case G1: // white kingside
+			p.movePiece(H1, F1)
+		case C8: // black queenside
+			p.movePiece(A8, D8)
+		case G8: // black kingside
+			p.movePiece(H8, F8)
+		default:
+			panic(fmt.Sprintf("castle to sq not recognized: %v", to))
+		}
+	}
+
+	// hash enPas?
+
+	p.history[p.hisPly].move = move
+	p.history[p.hisPly].fiftyMove = p.fiftyMove
+	p.history[p.hisPly].enPas = p.enPas
+	p.history[p.hisPly].castlePerm = p.castlePerm
+
+	// hash castle out?
+
+	// update castlePerms
+	// todo - potentially speed this up
+	switch from {
+	case A1:
+		p.castlePerm.Clear(CASTLE_PERMS_WQ)
+	case E1:
+		p.castlePerm.Clear(CASTLE_PERMS_WK)
+		p.castlePerm.Clear(CASTLE_PERMS_WQ)
+	case H1:
+		p.castlePerm.Clear(CASTLE_PERMS_WK)
+	case A8:
+		p.castlePerm.Clear(CASTLE_PERMS_BQ)
+	case E8:
+		p.castlePerm.Clear(CASTLE_PERMS_BQ)
+		p.castlePerm.Clear(CASTLE_PERMS_BK)
+	case H8:
+		p.castlePerm.Clear(CASTLE_PERMS_BK)
+	}
+
+	p.enPas = NO_SQ
+
+	// hash castle?
+
+	// update history in general
+	p.fiftyMove++
+	p.hisPly++
+	p.searchPly++
+
+	// update new enPas square
+	if pce == wP || pce == bP {
+		p.fiftyMove = 0
+		if move.isEnPas() {
+			if side == WHITE {
+				p.enPas = to - 10
+			} else {
+				p.enPas = to + 10
+			}
+		}
+		// hash ep?
+	}
+
+	// capture piece
+	if captured != EMPTY {
+		p.clearPiece(to)
+		p.fiftyMove = 0
+	}
+
+	// move piece very last, after clearing capture
+	p.movePiece(from, to)
+
+	// promoted
+	if promoted != EMPTY {
+		p.clearPiece(to)
+		p.addPiece(to, promoted)
+	}
+
+	// update any king move
+	if pce == wK || pce == bK {
+		p.kingSq[p.side] = to
+	}
+
+	// update side
+	p.side ^= 1 // flip from 0 <-> 1
+
+	// todo - optimize hash
+	p.posKey = p.GenPosKey()
+
+	// assert we're set up right
+	p.assertCache()
+	// hash side?
+
+	// last check if king is now attacked
+	if p.IsSquareAttacked(p.kingSq[side], p.side) {
+		p.UndoMove()
+		return false
+	}
+
+	return true
+}
+
+func (p *Position) UndoMove() {
+	p.assertCache()
+
+	p.hisPly--
+	p.searchPly--
+
+	u := p.history[p.hisPly]
+	move := u.move
+	from := move.getFrom()
+	to := move.getTo()
+
+	p.castlePerm = u.castlePerm
+	p.fiftyMove = u.fiftyMove
+	p.enPas = u.enPas
+
+	// switch sides
+	p.side ^= 1
+
+	// enPas need to remove an additional piece
+	if move.isEnPas() {
+		if p.side == WHITE {
+			p.addPiece(to-10, bP)
+		} else {
+			p.addPiece(to+10, bP)
+		}
+	}
+
+	// castling
+	if move.isCastle() {
+		switch to {
+		case C1: // white queenside
+			p.movePiece(D1, A1)
+		case G1: // white kingside
+			p.movePiece(F1, H1)
+		case C8: // black queenside
+			p.movePiece(D8, A8)
+		case G8: // black kingside
+			p.movePiece(F8, H8)
+		default:
+			panic(fmt.Sprintf("castle to sq not recognized: %v", to))
+		}
+	}
+
+	// promoted
+	if move.getPromoted() != EMPTY {
+		p.clearPiece(to)
+		if pieceLookups[move.getPromoted()].color == WHITE {
+			p.addPiece(to, wP)
+		} else {
+			p.addPiece(to, bP)
+		}
+	}
+
+	// move the piece (before restoring capture)
+	p.movePiece(to, from)
+
+	// restore king lookup if needed
+	pce := p.pieces[from]
+	if pce == wK || pce == bK {
+		p.kingSq[p.side] = from
+	}
+
+	// restore capture
+	if move.getCaptured() != EMPTY {
+		p.addPiece(to, move.getCaptured())
+	}
+
+	// rehash
+	p.posKey = p.GenPosKey()
 }
