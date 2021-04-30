@@ -96,6 +96,53 @@ func generateAllMoves(p *Position, list *movelist) {
 	// initialize
 	list.count = 0
 
+	// castling
+	if p == nil {
+		panic(fmt.Errorf("p should not be nil"))
+	}
+
+	if p.side == WHITE {
+
+		// white kingside
+		if p.castlePerm.Has(CASTLE_PERMS_WK) {
+			if p.pieces[F1] == EMPTY && p.pieces[G1] == EMPTY {
+				if !p.IsSquareAttacked(E1, BLACK) && !p.IsSquareAttacked(F1, BLACK) && !p.IsSquareAttacked(G1, BLACK) {
+					// add a new castle move
+					list.addQuietMove(p, newCastleMoveKey(E1, G1))
+				}
+			}
+		}
+
+		// white queenside
+		if p.castlePerm.Has(CASTLE_PERMS_WQ) {
+			if p.pieces[D1] == EMPTY && p.pieces[C1] == EMPTY {
+				if !p.IsSquareAttacked(E1, BLACK) && !p.IsSquareAttacked(D1, BLACK) && !p.IsSquareAttacked(C1, BLACK) {
+					list.addQuietMove(p, newCastleMoveKey(E1, C1))
+				}
+			}
+		}
+
+	} else {
+		// black kingside
+		if p.castlePerm.Has(CASTLE_PERMS_BK) {
+			if p.pieces[F8] == EMPTY && p.pieces[G8] == EMPTY {
+				if !p.IsSquareAttacked(E8, WHITE) && !p.IsSquareAttacked(F8, WHITE) && !p.IsSquareAttacked(G8, WHITE) {
+					// add a new castle move
+					list.addQuietMove(p, newCastleMoveKey(E8, G8))
+				}
+			}
+		}
+
+		// black queenside
+		if p.castlePerm.Has(CASTLE_PERMS_BQ) {
+			if p.pieces[D8] == EMPTY && p.pieces[C8] == EMPTY {
+				if !p.IsSquareAttacked(E8, WHITE) && !p.IsSquareAttacked(D8, WHITE) && !p.IsSquareAttacked(C8, WHITE) {
+					list.addQuietMove(p, newCastleMoveKey(E8, C8))
+				}
+			}
+		}
+	}
+
 	// pawns
 	if p.side == WHITE {
 		// iterate through each pawn
@@ -175,13 +222,13 @@ func generateAllMoves(p *Position, list *movelist) {
 
 	// set up all pieces per color
 	var nonslidingPieces [2]piece
-	//var slidePieces []piece
+	var slidingPieces [3]piece
 	if p.side == WHITE {
 		nonslidingPieces = [2]piece{wN, wK}
-		//slidePieces = []piece{wB, wR, wQ}
+		slidingPieces = [3]piece{wB, wR, wQ}
 	} else {
 		nonslidingPieces = [2]piece{bN, bK}
-		//slidePieces = []piece{bB, bR, bQ}
+		slidingPieces = [3]piece{bB, bR, bQ}
 	}
 
 	// knights/kings
@@ -204,21 +251,26 @@ func generateAllMoves(p *Position, list *movelist) {
 	}
 
 	// sliding pieces
-	//for _, pce := slidePieces {
-	//	for pceNum := 0; pceNum < p.pieceCount[pce]; pceNum++ {
-	//		fromSq := p.pieceList[pce][pceNum]
-	//
-	//		for _, dir := range dirKing {
-	//			toSq := fromSq + dir
-	//			if sqOffBoard(toSq) {
-	//				continue
-	//			}
-	//			if p.pieces[toSq] == EMPTY {
-	//				list.addQuietMove(p, newMovekey(fromSq, toSq, EMPTY, EMPTY, false, false))
-	//			} else if pieceLookups[p.pieces[toSq]].color != p.side {
-	//				list.addCaptureMove(p, newMovekey(fromSq, toSq, p.pieces[toSq], EMPTY, false, false))
-	//			}
-	//		}
-	//	}
-	//}
+	for _, pce := range slidingPieces {
+		for pceNum := 0; pceNum < p.pieceCount[pce]; pceNum++ {
+			fromSq := p.pieceList[pce][pceNum]
+
+			for _, dir := range pieceLookups[pce].dir {
+				toSq := fromSq + dir
+				toPce := p.pieces[toSq]
+				for toPce != NO_SQ {
+					if toPce == EMPTY {
+						list.addQuietMove(p, newMovekey(fromSq, toSq, EMPTY, EMPTY, false, false))
+					} else {
+						if pieceLookups[toPce].color != p.side {
+							list.addCaptureMove(p, newMovekey(fromSq, toSq, toPce, EMPTY, false, false))
+						}
+						break // go to next direction
+					}
+					toSq += dir
+					toPce = p.pieces[toSq]
+				}
+			}
+		}
+	}
 }

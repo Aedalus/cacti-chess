@@ -49,82 +49,82 @@ type Position struct {
 
 // GenPosKey generates a statistically unique uint64
 // key for the current state of the engine
-func (s Position) GenPosKey() uint64 {
+func (p Position) GenPosKey() uint64 {
 	var finalKey uint64 = 0
-	var p piece = piece(0)
+	var pce piece = piece(0)
 
 	// pieces
 	for sq := 0; sq < BOARD_SQ_NUMBER; sq++ {
-		p = s.pieces[sq]
-		if p != NO_SQ && p != EMPTY {
-			finalKey ^= hashPieceKeys[p][sq]
+		pce = p.pieces[sq]
+		if pce != NO_SQ && pce != EMPTY {
+			finalKey ^= hashPieceKeys[pce][sq]
 		}
 	}
 
 	// side
-	if s.side == WHITE {
+	if p.side == WHITE {
 		finalKey ^= hashSideKey
 	}
 
 	// enPas
-	if s.enPas != NO_SQ {
-		finalKey ^= hashPieceKeys[EMPTY][s.enPas]
+	if p.enPas != NO_SQ {
+		finalKey ^= hashPieceKeys[EMPTY][p.enPas]
 	}
 
 	// castle keys
-	finalKey ^= hashCastleKeys[s.castlePerm.val]
+	finalKey ^= hashCastleKeys[p.castlePerm.val]
 
 	return finalKey
 }
 
-func (s *Position) updateListCaches() {
+func (p *Position) updateListCaches() {
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
-		piece := s.pieces[i]
-		if piece != NO_SQ && piece != EMPTY {
-			color := pieceLookups[piece].color
-			if pieceLookups[piece].isBig {
-				s.bigPieceCount[color]++
+		pce := p.pieces[i]
+		if pce != NO_SQ && pce != EMPTY {
+			color := pieceLookups[pce].color
+			if pieceLookups[pce].isBig {
+				p.bigPieceCount[color]++
 			}
-			if pieceLookups[piece].isMajor {
-				s.majPieceCount[color]++
+			if pieceLookups[pce].isMajor {
+				p.majPieceCount[color]++
 			}
-			if pieceLookups[piece].isMinor {
-				s.minPieceCount[color]++
+			if pieceLookups[pce].isMinor {
+				p.minPieceCount[color]++
 			}
 
-			s.materialCount[color] += pieceLookups[piece].value
+			p.materialCount[color] += pieceLookups[pce].value
 
 			// update the pieceList, then increment the counter
 			// conceptually like
 			// [wP][0] = A2
 			// [wP][1] = B2 etc
-			curPieceCount := s.pieceCount[piece]
-			s.pieceList[piece][curPieceCount] = i
-			s.pieceCount[piece]++
+			curPieceCount := p.pieceCount[pce]
+			p.pieceList[pce][curPieceCount] = i
+			p.pieceCount[pce]++
 
 			// update king positions
-			if piece == wK {
-				s.kingSq[WHITE] = i
+			if pce == wK {
+				p.kingSq[WHITE] = i
 			}
-			if piece == bK {
-				s.kingSq[BLACK] = i
+			if pce == bK {
+				p.kingSq[BLACK] = i
 			}
 
 			// update pawn boards
-			if piece == wP {
-				s.pawns[WHITE].set(SQ64(i))
-				s.pawns[BOTH].set(SQ64(i))
+			if pce == wP {
+				p.pawns[WHITE].set(SQ64(i))
+				p.pawns[BOTH].set(SQ64(i))
 			}
-			if piece == bP {
-				s.pawns[BLACK].set(SQ64(i))
-				s.pawns[BOTH].set(SQ64(i))
+			if pce == bP {
+				p.pawns[BLACK].set(SQ64(i))
+				p.pawns[BOTH].set(SQ64(i))
 			}
 		}
 	}
 }
 
 // will panic if the cache isn't right. used for debugging
-func (s *Position) assertCache() {
+func (p *Position) assertCache() {
 	// temporary values we recompute to check against
 	t_pieceCount := [13]int{}
 	t_pieceList := [13][10]int{}
@@ -141,118 +141,118 @@ func (s *Position) assertCache() {
 	}
 
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
-		p := s.pieces[i]
-		if p != NO_SQ && p != EMPTY {
-			color := pieceLookups[p].color
-			if pieceLookups[p].isBig {
+		pce := p.pieces[i]
+		if pce != NO_SQ && pce != EMPTY {
+			color := pieceLookups[pce].color
+			if pieceLookups[pce].isBig {
 				t_bigPieceCount[color]++
 			}
-			if pieceLookups[p].isMajor {
+			if pieceLookups[pce].isMajor {
 				t_majPieceCount[color]++
 			}
-			if pieceLookups[p].isMinor {
+			if pieceLookups[pce].isMinor {
 				t_minPieceCount[color]++
 			}
 
-			t_materialCount[color] += pieceLookups[p].value
+			t_materialCount[color] += pieceLookups[pce].value
 
 			// update the pieceList, then increment the counter
 			// conceptually like
 			// [wP][0] = A2
 			// [wP][1] = B2 etc
-			curPieceCount := t_pieceCount[p]
-			t_pieceList[p][curPieceCount] = i
-			t_pieceCount[p]++
+			curPieceCount := t_pieceCount[pce]
+			t_pieceList[pce][curPieceCount] = i
+			t_pieceCount[pce]++
 
 			// update king positions
-			if p == wK {
+			if pce == wK {
 				t_kingSq[WHITE] = i
 			}
-			if p == bK {
+			if pce == bK {
 				t_kingSq[BLACK] = i
 			}
 
 			// update pawn boards
-			if p == wP {
+			if pce == wP {
 				t_pawns[WHITE].set(SQ64(i))
 				t_pawns[BOTH].set(SQ64(i))
 			}
-			if p == bP {
+			if pce == bP {
 				t_pawns[BLACK].set(SQ64(i))
 				t_pawns[BOTH].set(SQ64(i))
 			}
 		}
 	}
 
-	if !reflect.DeepEqual(t_pieceCount, s.pieceCount) {
-		panic(fmt.Errorf("pieceCount - got %v, want %v", s.pieceCount, t_pieceCount))
+	if !reflect.DeepEqual(t_pieceCount, p.pieceCount) {
+		panic(fmt.Errorf("pieceCount - got %v, want %v", p.pieceCount, t_pieceCount))
 	}
-	if !reflect.DeepEqual(t_pieceList, s.pieceList) {
-		panic(fmt.Errorf("pieceList - got %v, want %v", s.pieceList, t_pieceList))
+	if !reflect.DeepEqual(t_pieceList, p.pieceList) {
+		panic(fmt.Errorf("pieceList - got %v, want %v", p.pieceList, t_pieceList))
 	}
-	if !reflect.DeepEqual(t_bigPieceCount, s.bigPieceCount) {
-		panic(fmt.Errorf("bigPieceCount - got %v, want %v", s.bigPieceCount, t_bigPieceCount))
+	if !reflect.DeepEqual(t_bigPieceCount, p.bigPieceCount) {
+		panic(fmt.Errorf("bigPieceCount - got %v, want %v", p.bigPieceCount, t_bigPieceCount))
 	}
-	if !reflect.DeepEqual(t_majPieceCount, s.majPieceCount) {
-		panic(fmt.Errorf("majPieceCount - got %v want %v", s.majPieceCount, t_majPieceCount))
+	if !reflect.DeepEqual(t_majPieceCount, p.majPieceCount) {
+		panic(fmt.Errorf("majPieceCount - got %v want %v", p.majPieceCount, t_majPieceCount))
 	}
-	if !reflect.DeepEqual(t_minPieceCount, s.minPieceCount) {
-		panic(fmt.Errorf("minPieceCount - got %v want %v", s.minPieceCount, t_minPieceCount))
+	if !reflect.DeepEqual(t_minPieceCount, p.minPieceCount) {
+		panic(fmt.Errorf("minPieceCount - got %v want %v", p.minPieceCount, t_minPieceCount))
 	}
-	if !reflect.DeepEqual(t_kingSq, s.kingSq) {
-		panic(fmt.Errorf("kingSq - got %v want %v", s.kingSq, t_kingSq))
+	if !reflect.DeepEqual(t_kingSq, p.kingSq) {
+		panic(fmt.Errorf("kingSq - got %v want %v", p.kingSq, t_kingSq))
 	}
-	if !reflect.DeepEqual(t_materialCount, s.materialCount) {
-		panic(fmt.Errorf("materialCount - got %v want %v", s.materialCount, t_materialCount))
+	if !reflect.DeepEqual(t_materialCount, p.materialCount) {
+		panic(fmt.Errorf("materialCount - got %v want %v", p.materialCount, t_materialCount))
 	}
-	if !reflect.DeepEqual(t_pawns, s.pawns) {
-		panic(fmt.Errorf("pawns - got %v want %v", s.pawns, t_pawns))
+	if !reflect.DeepEqual(t_pawns, p.pawns) {
+		panic(fmt.Errorf("pawns - got %v want %v", p.pawns, t_pawns))
 	}
 }
 
 // Reset will re-initialize the engine to an empty state
-func (s *Position) Reset() {
+func (p *Position) Reset() {
 	// initialize piece array
-	s.pieces = &board120{}
+	p.pieces = &board120{}
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
-		s.pieces[i] = NO_SQ
+		p.pieces[i] = NO_SQ
 	}
 	for i := 0; i < 64; i++ {
-		s.pieces[SQ120(i)] = EMPTY
+		p.pieces[SQ120(i)] = EMPTY
 	}
 
 	// castle perms
-	s.castlePerm = &castlePerm{CASTLE_PERMS_NONE}
+	p.castlePerm = &castlePerm{CASTLE_PERMS_NONE}
 
 	// piece counts
 	for i := 0; i < 13; i++ {
-		s.pieceCount[i] = 0
+		p.pieceCount[i] = 0
 	}
 	for i := 0; i < 2; i++ {
-		s.bigPieceCount[i] = 0
-		s.majPieceCount[i] = 0
-		s.minPieceCount[i] = 0
-		s.materialCount[i] = 0
-		s.pawns[i] = &bitboard64{0}
+		p.bigPieceCount[i] = 0
+		p.majPieceCount[i] = 0
+		p.minPieceCount[i] = 0
+		p.materialCount[i] = 0
+		p.pawns[i] = &bitboard64{0}
 	}
 
-	s.pawns[WHITE] = &bitboard64{}
-	s.pawns[BLACK] = &bitboard64{}
-	s.pawns[BOTH] = &bitboard64{}
+	p.pawns[WHITE] = &bitboard64{}
+	p.pawns[BLACK] = &bitboard64{}
+	p.pawns[BOTH] = &bitboard64{}
 
-	s.kingSq[WHITE] = NO_SQ
-	s.kingSq[BLACK] = NO_SQ
+	p.kingSq[WHITE] = NO_SQ
+	p.kingSq[BLACK] = NO_SQ
 
-	s.side = BOTH
-	s.enPas = NO_SQ
-	s.fiftyMove = 0
-	s.searchPly = 0
-	s.halfMoveCount = 0
-	s.history = &[2048]undo{}
-	s.posKey = 0
+	p.side = BOTH
+	p.enPas = NO_SQ
+	p.fiftyMove = 0
+	p.searchPly = 0
+	p.halfMoveCount = 0
+	p.history = &[2048]undo{}
+	p.posKey = 0
 }
 
-func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
+func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 
 	// todo - delete these asserts for optimization
 	if fileLookups[sq] == NO_SQ {
@@ -261,15 +261,15 @@ func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	if attackingColor != WHITE && attackingColor != BLACK {
 		panic(fmt.Errorf("unexpected color: %v", attackingColor))
 	}
-	s.assertCache()
+	p.assertCache()
 
 	// pawns
 	if attackingColor == WHITE {
-		if s.pieces[sq-11] == wP || s.pieces[sq-9] == wP {
+		if p.pieces[sq-11] == wP || p.pieces[sq-9] == wP {
 			return true
 		}
 	} else {
-		if s.pieces[sq+11] == bP || s.pieces[sq+9] == bP {
+		if p.pieces[sq+11] == bP || p.pieces[sq+9] == bP {
 			return true
 		}
 	}
@@ -277,9 +277,9 @@ func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	// knights
 	for _, n := range dirKnight { // has the offsets for the knight jumps
 		kSq := sq + n
-		if attackingColor == WHITE && s.pieces[kSq] == wN {
+		if attackingColor == WHITE && p.pieces[kSq] == wN {
 			return true
-		} else if attackingColor == BLACK && s.pieces[kSq] == bN {
+		} else if attackingColor == BLACK && p.pieces[kSq] == bN {
 			return true
 		}
 	}
@@ -287,40 +287,40 @@ func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	// rook/queen
 	for _, dir := range dirRook {
 		tsq := sq + dir
-		p := s.pieces[tsq]
+		pce := p.pieces[tsq]
 		// only go until we're off the board
-		for p != NO_SQ {
-			if p != EMPTY {
-				if pieceLookups[p].isRookOrQueen && pieceLookups[p].color == attackingColor {
+		for pce != NO_SQ {
+			if pce != EMPTY {
+				if pieceLookups[pce].isRookOrQueen && pieceLookups[pce].color == attackingColor {
 					return true
 				}
 				break // break out if we hit something that wasn't a rook or queen
 			}
 			tsq += dir // move to the next square
-			p = s.pieces[tsq]
+			pce = p.pieces[tsq]
 		}
 	}
 
 	// bishop/queen
 	for _, dir := range dirBishop {
 		tsq := sq + dir
-		p := s.pieces[tsq]
+		pce := p.pieces[tsq]
 		// only go until we're off the board
-		for p != NO_SQ {
-			if p != EMPTY {
-				if pieceLookups[p].isBishopOrQueen && pieceLookups[p].color == attackingColor {
+		for pce != NO_SQ {
+			if pce != EMPTY {
+				if pieceLookups[pce].isBishopOrQueen && pieceLookups[pce].color == attackingColor {
 					return true
 				}
 				break // break out if we hit something else
 			}
 			tsq += dir // move to the next square
-			p = s.pieces[tsq]
+			pce = p.pieces[tsq]
 		}
 	}
 
 	for _, dir := range dirKing {
 		tsq := sq + dir
-		p := s.pieces[tsq]
+		p := p.pieces[tsq]
 		if p == wK && attackingColor == WHITE {
 			return true
 		}
@@ -333,23 +333,23 @@ func (s *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	return false
 }
 
-func (s Position) String() string {
+func (p Position) String() string {
 	output := strings.Builder{}
-	output.WriteString(s.PrintBoard())
+	output.WriteString(p.PrintBoard())
 	output.WriteString("--------\n")
-	output.WriteString(fmt.Sprintf("side: %v\n", s.side))
-	output.WriteString(fmt.Sprintf("enPas: %v\n", s.enPas))
-	output.WriteString(fmt.Sprintf("castle: %v\n", s.castlePerm))
-	output.WriteString(fmt.Sprintf("posKey: %x\n", s.posKey))
+	output.WriteString(fmt.Sprintf("side: %v\n", p.side))
+	output.WriteString(fmt.Sprintf("enPas: %v\n", p.enPas))
+	output.WriteString(fmt.Sprintf("castle: %v\n", p.castlePerm))
+	output.WriteString(fmt.Sprintf("posKey: %x\n", p.posKey))
 
 	return output.String()
 }
-func (s Position) PrintBoard() string {
+func (p Position) PrintBoard() string {
 	output := strings.Builder{}
 	for r := RANK_8; r >= RANK_1; r-- {
 		for f := FILE_A; f <= FILE_H; f++ {
 			sq := fileRankToSq(int(f), int(r))
-			piece := s.pieces[sq]
+			piece := p.pieces[sq]
 			output.WriteString(piece.String())
 		}
 		output.WriteString("\n")
@@ -357,15 +357,15 @@ func (s Position) PrintBoard() string {
 	return output.String()
 }
 
-// PrintSQsAttackedBySide returns a string representation
+// PrintAttackBoard returns a string representation
 // of all squares attacked by a given side
-func (s Position) PrintAttackBoard(attackingSide int) string {
+func (p Position) PrintAttackBoard(attackingSide int) string {
 	output := strings.Builder{}
 
 	for r := RANK_8; r >= RANK_1; r-- {
 		for f := FILE_A; f <= FILE_H; f++ {
 			sq := fileRankToSq(f, r)
-			if s.IsSquareAttacked(sq, attackingSide) {
+			if p.IsSquareAttacked(sq, attackingSide) {
 				output.WriteString("X")
 			} else {
 				output.WriteString("-")

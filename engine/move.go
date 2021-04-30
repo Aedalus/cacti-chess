@@ -27,6 +27,13 @@ type movekey struct {
 	val uint64
 }
 
+func newCastleMoveKey(from, to int) *movekey {
+	k := &movekey{}
+	k.setFrom(from)
+	k.setTo(to)
+	k.setCastle()
+	return k
+}
 func newMovekey(from, to int, captured, promoted piece, enPas, pawnStart bool) *movekey {
 	k := &movekey{}
 
