@@ -5,3 +5,5 @@
 - eliminate p.pieceCount and just use slices
     - need perf tests first
 - speed up hashes in make_move
+
+// 5071866835353602606

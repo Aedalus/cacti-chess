@@ -30,9 +30,9 @@ type bitboard64 struct {
 	val uint64
 }
 
-func (b *bitboard64) set(index int)    { b.val = b.val | 1<<index }
-func (b *bitboard64) clear(index int)  { b.val = b.val &^ 1 << index }
-func (b *bitboard64) toggle(index int) { b.val = b.val ^ 1<<index }
+func (b *bitboard64) set(index int)    { b.val = b.val | (1 << index) }
+func (b *bitboard64) clear(index int)  { b.val = b.val & ^(1 << index) }
+func (b *bitboard64) toggle(index int) { b.val = b.val ^ (1 << index) }
 func (b *bitboard64) has(index int) bool {
 	return (b.val & (1 << index)) != 0
 }
@@ -80,6 +80,7 @@ func sqOffBoard(sq int) bool {
 
 func (b bitboard64) String() string {
 	str := strings.Builder{}
+	str.WriteString("\n")
 	for rank := 7; rank >= 0; rank-- {
 		for file := 0; file < 8; file++ {
 			if b.has(rank*8 + file) {

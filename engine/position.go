@@ -7,7 +7,7 @@ import (
 )
 
 type undo struct {
-	move       movekey
+	move       *movekey
 	castlePerm *castlePerm
 	enPas      int
 	fiftyMove  int
@@ -124,7 +124,7 @@ func (p *Position) updateListCaches() {
 }
 
 // will panic if the cache isn't right. used for debugging
-func (p *Position) assertCache() {
+func (p *Position) assertCache() error {
 	// temporary values we recompute to check against
 	t_pieceCount := [13]int{}
 	t_pieceList := [13][10]int{}
@@ -139,6 +139,23 @@ func (p *Position) assertCache() {
 		&bitboard64{},
 		&bitboard64{},
 		&bitboard64{},
+	}
+
+	// check piece lists
+	for pce := wP; pce <= bK; pce++ {
+		for i := 0; i < p.pieceCount[pce]; i++ {
+			sq := p.pieceList[pce][i]
+			if sq == 0 {
+				return fmt.Errorf("pieceList error: (%d)[%d]: sq should not be 0", int(pce), i)
+			}
+			if sqOffBoard(sq) {
+				return fmt.Errorf("pieceList error: (%d)[%d]: sq %d is off board", int(pce), i, sq)
+			}
+			if p.pieces[sq] != pce {
+				return fmt.Errorf("pieceList error: (%d)[%d]: sq %d had %d", int(pce), i, sq, p.pieces[sq])
+			}
+
+		}
 	}
 
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
@@ -186,32 +203,31 @@ func (p *Position) assertCache() {
 	}
 
 	if !reflect.DeepEqual(t_pieceCount, p.pieceCount) {
-		panic(fmt.Errorf("pieceCount - got %v, want %v", p.pieceCount, t_pieceCount))
-	}
-	if !reflect.DeepEqual(t_pieceList, p.pieceList) {
-		panic(fmt.Errorf("pieceList - got %v, want %v", p.pieceList, t_pieceList))
+		return fmt.Errorf("pieceCount - got %v, want %v", p.pieceCount, t_pieceCount)
 	}
 	if !reflect.DeepEqual(t_bigPieceCount, p.bigPieceCount) {
-		panic(fmt.Errorf("bigPieceCount - got %v, want %v", p.bigPieceCount, t_bigPieceCount))
+		return fmt.Errorf("bigPieceCount - got %v, want %v", p.bigPieceCount, t_bigPieceCount)
 	}
 	if !reflect.DeepEqual(t_majPieceCount, p.majPieceCount) {
-		panic(fmt.Errorf("majPieceCount - got %v want %v", p.majPieceCount, t_majPieceCount))
+		return fmt.Errorf("majPieceCount - got %v want %v", p.majPieceCount, t_majPieceCount)
 	}
 	if !reflect.DeepEqual(t_minPieceCount, p.minPieceCount) {
-		panic(fmt.Errorf("minPieceCount - got %v want %v", p.minPieceCount, t_minPieceCount))
+		return fmt.Errorf("minPieceCount - got %v want %v", p.minPieceCount, t_minPieceCount)
 	}
 	if !reflect.DeepEqual(t_kingSq, p.kingSq) {
-		panic(fmt.Errorf("kingSq - got %v want %v", p.kingSq, t_kingSq))
+		return fmt.Errorf("kingSq - got %v want %v", p.kingSq, t_kingSq)
 	}
 	if !reflect.DeepEqual(t_materialCount, p.materialCount) {
-		panic(fmt.Errorf("materialCount - got %v want %v", p.materialCount, t_materialCount))
+		return fmt.Errorf("materialCount - got %v want %v", p.materialCount, t_materialCount)
 	}
 	if !reflect.DeepEqual(t_pawns, p.pawns) {
-		panic(fmt.Errorf("pawns - got %v want %v", p.pawns, t_pawns))
+		return fmt.Errorf("pawns - got %v want %v", p.pawns, t_pawns)
 	}
 	if p.posKey != t_posKey {
-		panic(fmt.Errorf("posKey - got %v want %v", p.posKey, t_posKey))
+		return fmt.Errorf("posKey - got %v want %v", p.posKey, t_posKey)
 	}
+
+	return nil
 }
 
 // Reset will re-initialize the engine to an empty state
@@ -265,7 +281,10 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	if attackingColor != WHITE && attackingColor != BLACK {
 		panic(fmt.Errorf("unexpected color: %v", attackingColor))
 	}
-	p.assertCache()
+	err := p.assertCache()
+	if err != nil {
+		panic(err)
+	}
 
 	// pawns
 	if attackingColor == WHITE {

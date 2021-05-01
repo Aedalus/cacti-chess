@@ -92,9 +92,9 @@ func (list *movelist) addBlackPawnMove(p *Position, from, to int) {
 	}
 }
 
-func generateAllMoves(p *Position, list *movelist) {
-	// initialize
-	list.count = 0
+func (p *Position) generateAllMoves() *movelist {
+
+	list := &movelist{}
 
 	// castling
 	if p == nil {
@@ -273,4 +273,6 @@ func generateAllMoves(p *Position, list *movelist) {
 			}
 		}
 	}
+
+	return list
 }

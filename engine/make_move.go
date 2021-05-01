@@ -58,14 +58,10 @@ func (p *Position) clearPiece(sq int) {
 		}
 	}
 
-	if foundPieceIndex == -1 {
-		panic("piece should have been found in pieceList")
-	}
-
 	// copy the last item in the list to the found index
-	p.pieceList[pce][foundPieceIndex] = p.pieceList[pce][p.pieceCount[pce]]
+	p.pieceList[pce][foundPieceIndex] = p.pieceList[pce][p.pieceCount[pce]-1]
 	// delete the last index, since we copied it forward
-	p.pieceList[pce][p.pieceCount[pce]] = 0
+	p.pieceList[pce][p.pieceCount[pce]-1] = 0
 	// decrement the total piece count to match
 	p.pieceCount[pce]--
 }
@@ -73,6 +69,8 @@ func (p *Position) clearPiece(sq int) {
 func (p *Position) addPiece(sq int, pce piece) {
 
 	pceMeta := pieceLookups[pce]
+
+	p.pieces[sq] = pce
 
 	if pceMeta.isBig {
 		p.bigPieceCount[pceMeta.color]++
@@ -82,21 +80,25 @@ func (p *Position) addPiece(sq int, pce piece) {
 			p.minPieceCount[pceMeta.color]++
 		}
 	} else {
-		p.pawns[pceMeta.color].set(sq)
-		p.pawns[BOTH].set(sq)
+		p.pawns[pceMeta.color].set(SQ64(sq))
+		p.pawns[BOTH].set(SQ64(sq))
 	}
 
 	// add value
 	p.materialCount[pceMeta.color] += pceMeta.value
 
 	// update pieceLists
-	p.pieceCount[pce]++
 	p.pieceList[pce][p.pieceCount[pce]] = sq
+	p.pieceCount[pce]++
 }
 
 func (p *Position) movePiece(from, to int) {
 	pce := p.pieces[from]
 	pceMeta := pieceLookups[pce]
+
+	if pce == EMPTY {
+		panic("woops!")
+	}
 
 	p.pieces[from] = EMPTY
 	p.pieces[to] = pce
@@ -114,19 +116,25 @@ func (p *Position) movePiece(from, to int) {
 		if p.pieceList[pce][i] == from {
 			p.pieceList[pce][i] = to
 			found = true
+			break
 		}
 	}
 
 	// todo - eliminate after perft
 	if !found {
+		fmt.Println("woops!")
+		// something setting p.pieceList[bP][1] to 0
 		panic("didnt find existing piece")
 	}
 }
 
 // MakeMove updates the position for a newly made
 // move. It returns false if a king is left in check.
-func (p *Position) MakeMove(move movekey) bool {
-	p.assertCache()
+func (p *Position) MakeMove(move *movekey) bool {
+	err := p.assertCache()
+	if err != nil {
+		panic(err)
+	}
 
 	from := move.getFrom()
 	to := move.getTo()
@@ -136,7 +144,10 @@ func (p *Position) MakeMove(move movekey) bool {
 	pce := p.pieces[from]
 
 	p.history[p.hisPly].posKey = p.posKey
-	p.hisPly++
+
+	//if from == 51 && to == 62 && captured == bP {
+	//	fmt.Println("foo!")
+	//}
 
 	// enPas need to remove an additional piece
 	if move.isEnPas() {
@@ -240,8 +251,11 @@ func (p *Position) MakeMove(move movekey) bool {
 	p.posKey = p.GenPosKey()
 
 	// assert we're set up right
-	p.assertCache()
-	// hash side?
+	err = p.assertCache()
+	if err != nil {
+		fmt.Errorf("woops!")
+		panic(err)
+	}
 
 	// last check if king is now attacked
 	if p.IsSquareAttacked(p.kingSq[side], p.side) {
@@ -253,7 +267,10 @@ func (p *Position) MakeMove(move movekey) bool {
 }
 
 func (p *Position) UndoMove() {
-	p.assertCache()
+	err := p.assertCache()
+	if err != nil {
+		panic(err)
+	}
 
 	p.hisPly--
 	p.searchPly--
@@ -262,6 +279,15 @@ func (p *Position) UndoMove() {
 	move := u.move
 	from := move.getFrom()
 	to := move.getTo()
+	captured := move.getCaptured()
+
+	if from == 51 && to == 62 && captured == bP {
+		fmt.Println("foo!")
+		err = p.assertCache()
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	p.castlePerm = u.castlePerm
 	p.fiftyMove = u.fiftyMove
@@ -305,7 +331,6 @@ func (p *Position) UndoMove() {
 		}
 	}
 
-	// move the piece (before restoring capture)
 	p.movePiece(to, from)
 
 	// restore king lookup if needed
@@ -315,10 +340,16 @@ func (p *Position) UndoMove() {
 	}
 
 	// restore capture
-	if move.getCaptured() != EMPTY {
-		p.addPiece(to, move.getCaptured())
+	if captured != EMPTY {
+		p.addPiece(to, captured)
 	}
 
 	// rehash
 	p.posKey = p.GenPosKey()
+
+	err = p.assertCache()
+	if err != nil {
+		fmt.Println("woops")
+		panic(err)
+	}
 }

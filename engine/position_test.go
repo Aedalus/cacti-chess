@@ -162,5 +162,5 @@ func TestAssertCache(t *testing.T) {
 	state, err := ParseFen(fen)
 	assert.Nil(t, err)
 
-	state.assertCache()
+	assert.Nil(t, state.assertCache())
 }
