@@ -115,7 +115,7 @@ func (p *Position) generateAllMoves() *movelist {
 
 		// white queenside
 		if p.castlePerm.Has(CASTLE_PERMS_WQ) {
-			if p.pieces[D1] == EMPTY && p.pieces[C1] == EMPTY {
+			if p.pieces[D1] == EMPTY && p.pieces[C1] == EMPTY && p.pieces[B1] == EMPTY {
 				if !p.IsSquareAttacked(E1, BLACK) && !p.IsSquareAttacked(D1, BLACK) && !p.IsSquareAttacked(C1, BLACK) {
 					list.addQuietMove(p, newCastleMoveKey(E1, C1))
 				}
@@ -135,7 +135,7 @@ func (p *Position) generateAllMoves() *movelist {
 
 		// black queenside
 		if p.castlePerm.Has(CASTLE_PERMS_BQ) {
-			if p.pieces[D8] == EMPTY && p.pieces[C8] == EMPTY {
+			if p.pieces[D8] == EMPTY && p.pieces[C8] == EMPTY && p.pieces[B8] == EMPTY {
 				if !p.IsSquareAttacked(E8, WHITE) && !p.IsSquareAttacked(D8, WHITE) && !p.IsSquareAttacked(C8, WHITE) {
 					list.addQuietMove(p, newCastleMoveKey(E8, C8))
 				}

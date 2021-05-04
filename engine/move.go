@@ -9,6 +9,8 @@ import (
 The movekey condenses all the information
 about a player's move into 64 bits
 
+                 11 1100 0000 0000 0000
+               0100 0001 0110 1011 0110
 4 ------- 3 ------- 2 ------- 1 -------
 0000 0000 0000 0000 0000 0000 0xxx xxxx -> From
 0000 0000 0000 0000 00xx xxxx x000 0000 -> To
@@ -103,7 +105,7 @@ func printSq(sq int) string {
 const (
 	moveKeyFromBitmask          uint64 = 0x7f
 	moveKeyToBitmask            uint64 = 0x7F << 7
-	moveKeyCapturedBitmask      uint64 = 0x7c000
+	moveKeyCapturedBitmask      uint64 = 0x3c000
 	moveKeyEnPasBitmask         uint64 = 0x40000
 	moveKeyPawnStartBitmask     uint64 = 0x80000
 	moveKeyPromotedPieceBitmask uint64 = 0xf00000

@@ -7,8 +7,8 @@ import (
 )
 
 type undo struct {
-	move       *movekey
-	castlePerm *castlePerm
+	move       movekey
+	castlePerm castlePerm
 	enPas      int
 	fiftyMove  int
 	posKey     uint64

@@ -31,6 +31,11 @@ func (p *Position) clearPiece(sq int) {
 	pce := p.pieces[sq]
 	pceMeta := pieceLookups[pce]
 
+	// todo - remove
+	if pce == EMPTY {
+		panic(fmt.Sprintf("tried to clean an empty piece on sq %d", sq))
+	}
+
 	// set square, subtract value
 	p.pieces[sq] = EMPTY
 	p.materialCount[pceMeta.color] -= pceMeta.value
@@ -145,10 +150,6 @@ func (p *Position) MakeMove(move *movekey) bool {
 
 	p.history[p.hisPly].posKey = p.posKey
 
-	//if from == 51 && to == 62 && captured == bP {
-	//	fmt.Println("foo!")
-	//}
-
 	// enPas need to remove an additional piece
 	if move.isEnPas() {
 		if side == WHITE {
@@ -176,10 +177,10 @@ func (p *Position) MakeMove(move *movekey) bool {
 
 	// hash enPas?
 
-	p.history[p.hisPly].move = move
+	p.history[p.hisPly].move = *move
 	p.history[p.hisPly].fiftyMove = p.fiftyMove
 	p.history[p.hisPly].enPas = p.enPas
-	p.history[p.hisPly].castlePerm = p.castlePerm
+	p.history[p.hisPly].castlePerm = *p.castlePerm
 
 	// hash castle out?
 
@@ -202,7 +203,15 @@ func (p *Position) MakeMove(move *movekey) bool {
 		p.castlePerm.Clear(CASTLE_PERMS_BK)
 	}
 
-	p.enPas = NO_SQ
+	if move.isPawnStart() {
+		if side == WHITE {
+			p.enPas = to - 10
+		} else {
+			p.enPas = to + 10
+		}
+	} else {
+		p.enPas = NO_SQ
+	}
 
 	// hash castle?
 
@@ -281,15 +290,7 @@ func (p *Position) UndoMove() {
 	to := move.getTo()
 	captured := move.getCaptured()
 
-	if from == 51 && to == 62 && captured == bP {
-		fmt.Println("foo!")
-		err = p.assertCache()
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	p.castlePerm = u.castlePerm
+	p.castlePerm = &u.castlePerm
 	p.fiftyMove = u.fiftyMove
 	p.enPas = u.enPas
 

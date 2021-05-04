@@ -177,6 +177,13 @@ func Test_movekey(t *testing.T) {
 			assert.True(t, j.val & ^moveKeyPromotedPieceBitmask == ^moveKeyPromotedPieceBitmask)
 		}
 	})
+
+	t.Run("enPas doesn't override capture", func(t *testing.T) {
+		k := &movekey{}
+		k.setEnPas()
+		cap := k.getCaptured()
+		assert.Equal(t, EMPTY, cap)
+	})
 }
 
 func Test_printMove(t *testing.T) {
