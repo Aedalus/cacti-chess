@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"strings"
@@ -104,7 +104,7 @@ func init() {
 	}
 
 	// fill them in
-	sq64 := 0 // count the current board64 index
+	sq64 := 0 // Count the current board64 index
 	for rank := 0; rank < 8; rank++ {
 		for file := 0; file < 8; file++ {
 			sq120 := fileRankToSq(file, rank)

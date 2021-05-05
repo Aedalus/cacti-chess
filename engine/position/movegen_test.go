@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -15,7 +15,7 @@ type testCaseMoveGen struct {
 
 func (tc testCaseMoveGen) assert(t *testing.T) {
 	t.Helper()
-	p, err := ParseFen(tc.fen)
+	p, err := FromFen(tc.fen)
 	require.Nil(t, err)
 	require.NotNil(t, p)
 

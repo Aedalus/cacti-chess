@@ -1,7 +1,8 @@
-package engine
+package perft
 
 import (
 	"bufio"
+	"cacti-chess/engine/position"
 	"fmt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -66,12 +67,13 @@ func getPerftTestCases2(t *testing.T) []*testCasePerft {
 func Test_Perft_All(t *testing.T) {
 	tsc := getPerftTestCases2(t)
 
-	for depth := 0; depth < 6; depth++ {
+	maxDepth := 2
+	for depth := 0; depth <= maxDepth; depth++ {
 		for _, tc := range tsc {
-			p, err := ParseFen(tc.fen)
+			p, err := position.FromFen(tc.fen)
 			require.Nil(t, err)
 
-			got := p.Perft(depth)
+			got := Perft(p, depth)
 			want := tc.depths[depth]
 			if want != got {
 				t.Fatalf("perft error (line %d depth %d): %v | got %v, want %v\n", tc.lineNumber, depth, tc.fen, got, want)
@@ -83,25 +85,23 @@ func Test_Perft_All(t *testing.T) {
 }
 func Test_Perft_StartingPos(t *testing.T) {
 	fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-	p, err := ParseFen(fen)
+	p, err := position.FromFen(fen)
 	require.Nil(t, err)
 
-	assert.Equal(t, 1, p.Perft(0))
-	assert.Equal(t, 20, p.Perft(1))
-	assert.Equal(t, 400, p.Perft(2))
-	assert.Equal(t, 8902, p.Perft(3))
-	assert.Equal(t, 197281, p.Perft(4))
-	assert.Equal(t, 4865609, p.Perft(5))
-	//assert.Equal(t, 119060324, p.Perft(6))
-
+	assert.Equal(t, 1, Perft(p, 0))
+	assert.Equal(t, 20, Perft(p, 1))
+	assert.Equal(t, 400, Perft(p, 2))
+	assert.Equal(t, 8902, Perft(p, 3))
+	assert.Equal(t, 197281, Perft(p, 4))
+	assert.Equal(t, 4865609, Perft(p, 5))
 }
 
 func Test_Perft_Sample_A(t *testing.T) {
 	fen := "r3kbnr/2qn2p1/8/pppBpp1P/3P1Pb1/P1P1P3/1P2Q2P/RNB1K1NR w KQkq - 0 1"
-	p, err := ParseFen(fen)
+	p, err := position.FromFen(fen)
 	require.Nil(t, err)
 
-	pft := p.Perft(2)
+	pft := Perft(p, 2)
 	want := map[string]int{
 		"b2b3": 40,
 		"h2h3": 40,
@@ -151,30 +151,4 @@ func Test_Perft_Sample_A(t *testing.T) {
 	assert.Equal(t, want, perftCounts)
 	fmt.Println(perftCounts)
 	fmt.Println(perftSubmoves)
-}
-
-func Test_Perft_Sample_B(t *testing.T) {
-	// all based off of "rn1q1bnr/3kppp1/p1pp3p/1p3b2/1P6/2P2N1P/P1QPPPB1/RNB1K2R b KQ - 0 1"
-	tcs := []struct {
-		move     string
-		fen      string
-		expected int
-	}{
-		{
-			"d4e3",
-			"r2n3r/1bNk2pp/6P1/pP3p2/5qnP/1P1Ppp1R/2P3B1/Q1B1bKN1 w - - 0 2",
-			36,
-		},
-	}
-
-	for _, tc := range tcs {
-		p, err := ParseFen(tc.fen)
-		if err != nil {
-			panic(err)
-		}
-		pft := p.Perft(1)
-		if tc.expected != pft {
-			panic(fmt.Sprintf("%v - got %v want %v", tc.move, pft, tc.expected))
-		}
-	}
 }

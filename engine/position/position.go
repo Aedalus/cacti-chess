@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"fmt"
@@ -30,25 +30,25 @@ type Position struct {
 
 	enPas int // if en passant is available
 
-	fiftyMove int // 50 move counter (100 since we're using half moves)
+	fiftyMove int // 50 move counter (100 since we're using half Moves)
 
 	searchPly uint // how far we are in the search
 
 	posKey uint64 // unique index for position
 
-	pieceCount    [13]int // count of all pieces on the board
+	pieceCount    [13]int // Count of all pieces on the board
 	bigPieceCount [2]int  // white/black non-pawn pieces
 	majPieceCount [2]int  // queen/rook
 	minPieceCount [2]int  // bishop/knight
-	materialCount [2]int  // count of material
+	materialCount [2]int  // Count of material
 
 	// history
-	hisPly  int // how many half moves have been made in the whole game
+	hisPly  int // how many half Moves have been made in the whole game
 	history *[2048]undo
 }
 
 // GenPosKey generates a statistically unique uint64
-// key for the current state of the engine
+// Key for the current state of the engine
 func (p Position) GenPosKey() uint64 {
 	var finalKey uint64 = 0
 	var pce piece = piece(0)
@@ -124,7 +124,7 @@ func (p *Position) updateListCaches() {
 }
 
 // will panic if the cache isn't right. used for debugging
-func (p *Position) assertCache() error {
+func (p *Position) AssertCache() error {
 	//todo - comment out
 	return nil
 	// temporary values we recompute to check against
@@ -283,7 +283,7 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	if attackingColor != WHITE && attackingColor != BLACK {
 		panic(fmt.Errorf("unexpected color: %v", attackingColor))
 	}
-	err := p.assertCache()
+	err := p.AssertCache()
 	if err != nil {
 		panic(err)
 	}

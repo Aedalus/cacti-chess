@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"fmt"
@@ -6,10 +6,8 @@ import (
 	"strings"
 )
 
-//"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
-// ParseFen parses a fen string and returns the corresponding board
-func ParseFen(fen string) (*Position, error) {
+// FromFen parses a fen string and returns the corresponding board
+func FromFen(fen string) (*Position, error) {
 	fenPieces := strings.Split(fen, " ")
 	if len(fenPieces) != 6 {
 		return nil, fmt.Errorf("fen should have 6 parts")

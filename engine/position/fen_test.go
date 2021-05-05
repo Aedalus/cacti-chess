@@ -1,11 +1,12 @@
-package engine
+package position
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
-func TestFenParsePiecesStr(t *testing.T) {
+func Test_FenParsePiecesStr(t *testing.T) {
 	t.Run("it can parse starting position", func(t *testing.T) {
 		fenStr := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
 		got, err := parsePiecesStr(fenStr)
@@ -44,7 +45,7 @@ func TestFenParsePiecesStr(t *testing.T) {
 	})
 }
 
-func TestParseCastlePerms(t *testing.T) {
+func Test_FenParseCastlePerms(t *testing.T) {
 	t.Run("it can test castle perms", func(t *testing.T) {
 		tests := []struct {
 			permStr  string
@@ -67,12 +68,12 @@ func TestParseCastlePerms(t *testing.T) {
 	})
 }
 
-func TestParseFen(t *testing.T) {
+func Test_FromFen(t *testing.T) {
 	t.Run("it can parse a starting position", func(t *testing.T) {
 		fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-		state, err := ParseFen(fen)
+		state, err := FromFen(fen)
 
-		assert.Nil(t, err)
+		require.Nil(t, err)
 		assert.Equal(t, WHITE, state.side)
 		assert.Equal(t, &castlePerm{val: CASTLE_PERMS_ALL}, state.castlePerm)
 		assert.Equal(t, -1, state.enPas)

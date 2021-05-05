@@ -1,6 +1,8 @@
-package engine
+package position
 
-import "fmt"
+import (
+	"fmt"
+)
 
 /*
 Making a move...
@@ -67,7 +69,7 @@ func (p *Position) clearPiece(sq int) {
 	p.pieceList[pce][foundPieceIndex] = p.pieceList[pce][p.pieceCount[pce]-1]
 	// delete the last index, since we copied it forward
 	p.pieceList[pce][p.pieceCount[pce]-1] = 0
-	// decrement the total piece count to match
+	// decrement the total piece Count to match
 	p.pieceCount[pce]--
 }
 
@@ -136,7 +138,7 @@ func (p *Position) movePiece(from, to int) {
 // MakeMove updates the position for a newly made
 // move. It returns false if a king is left in check.
 func (p *Position) MakeMove(move *movekey) bool {
-	err := p.assertCache()
+	err := p.AssertCache()
 	if err != nil {
 		panic(err)
 	}
@@ -265,7 +267,7 @@ func (p *Position) MakeMove(move *movekey) bool {
 	p.posKey = p.GenPosKey()
 
 	// assert we're set up right
-	err = p.assertCache()
+	err = p.AssertCache()
 	if err != nil {
 		fmt.Errorf("woops!")
 		panic(err)
@@ -285,7 +287,7 @@ func (p *Position) MakeMove(move *movekey) bool {
 }
 
 func (p *Position) UndoMove() {
-	err := p.assertCache()
+	err := p.AssertCache()
 	if err != nil {
 		panic(err)
 	}
@@ -357,7 +359,7 @@ func (p *Position) UndoMove() {
 	// rehash
 	p.posKey = p.GenPosKey()
 
-	err = p.assertCache()
+	err = p.AssertCache()
 	if err != nil {
 		fmt.Println("woops")
 		panic(err)

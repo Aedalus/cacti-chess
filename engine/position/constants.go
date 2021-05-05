@@ -1,6 +1,8 @@
-package engine
+package position
 
-import "math/rand"
+import (
+	"math/rand"
+)
 
 const BOARD_SQ_NUMBER = 120
 const NO_SQ = -1

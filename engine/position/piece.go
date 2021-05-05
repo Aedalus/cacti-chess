@@ -1,4 +1,4 @@
-package engine
+package position
 
 type piece int8
 

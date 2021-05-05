@@ -1,54 +1,55 @@
-package engine
+package position
 
 import (
 	"fmt"
 	"strings"
 )
 
-type movescore struct {
-	key   *movekey
-	score int
+type Movescore struct {
+	Key   *movekey
+	Score int
 }
 
-type movelist struct {
-	moves [256]movescore
-	count int
+// todo - turn this into a slice
+type Movelist struct {
+	Moves [256]Movescore
+	Count int
 }
 
-func (list *movelist) String() string {
+func (list *Movelist) String() string {
 	b := strings.Builder{}
 
 	b.WriteString("movelist: \n")
-	for i := 0; i < list.count; i++ {
-		move := list.moves[i].key
-		score := list.moves[i].score
+	for i := 0; i < list.Count; i++ {
+		move := list.Moves[i].Key
+		score := list.Moves[i].Score
 
-		b.WriteString(fmt.Sprintf("Move:%d > %v (score:%d)\n", i, move.ShortString(), score))
+		b.WriteString(fmt.Sprintf("Move:%d > %v (Score:%d)\n", i, move.ShortString(), score))
 	}
-	b.WriteString(fmt.Sprintf("movelist total: %d", list.count))
+	b.WriteString(fmt.Sprintf("movelist total: %d", list.Count))
 
 	return b.String()
 }
 
-func (list *movelist) addQuietMove(p *Position, move *movekey) {
-	list.moves[list.count].key = move
-	list.moves[list.count].score = 0
-	list.count++
+func (list *Movelist) addQuietMove(p *Position, move *movekey) {
+	list.Moves[list.Count].Key = move
+	list.Moves[list.Count].Score = 0
+	list.Count++
 }
 
-func (list *movelist) addCaptureMove(p *Position, move *movekey) {
-	list.moves[list.count].key = move
-	list.moves[list.count].score = 0
-	list.count++
+func (list *Movelist) addCaptureMove(p *Position, move *movekey) {
+	list.Moves[list.Count].Key = move
+	list.Moves[list.Count].Score = 0
+	list.Count++
 }
 
-func (list *movelist) addEnPasMove(p *Position, move *movekey) {
-	list.moves[list.count].key = move
-	list.moves[list.count].score = 0
-	list.count++
+func (list *Movelist) addEnPasMove(p *Position, move *movekey) {
+	list.Moves[list.Count].Key = move
+	list.Moves[list.Count].Score = 0
+	list.Count++
 }
 
-func (list *movelist) addWhitePawnCaptureMove(p *Position, from, to int, captured piece) {
+func (list *Movelist) addWhitePawnCaptureMove(p *Position, from, to int, captured piece) {
 	if rankLookups[from] == RANK_7 {
 		list.addCaptureMove(p, newMovekey(from, to, captured, wQ, false, false))
 		list.addCaptureMove(p, newMovekey(from, to, captured, wR, false, false))
@@ -59,7 +60,7 @@ func (list *movelist) addWhitePawnCaptureMove(p *Position, from, to int, capture
 	}
 }
 
-func (list *movelist) addWhitePawnMove(p *Position, from, to int) {
+func (list *Movelist) addWhitePawnMove(p *Position, from, to int) {
 	if rankLookups[from] == RANK_7 {
 		list.addCaptureMove(p, newMovekey(from, to, EMPTY, wQ, false, false))
 		list.addCaptureMove(p, newMovekey(from, to, EMPTY, wR, false, false))
@@ -70,7 +71,7 @@ func (list *movelist) addWhitePawnMove(p *Position, from, to int) {
 	}
 }
 
-func (list *movelist) addBlackPawnCaptureMove(p *Position, from, to int, captured piece) {
+func (list *Movelist) addBlackPawnCaptureMove(p *Position, from, to int, captured piece) {
 	if rankLookups[from] == RANK_2 {
 		list.addCaptureMove(p, newMovekey(from, to, captured, bQ, false, false))
 		list.addCaptureMove(p, newMovekey(from, to, captured, bR, false, false))
@@ -81,7 +82,7 @@ func (list *movelist) addBlackPawnCaptureMove(p *Position, from, to int, capture
 	}
 }
 
-func (list *movelist) addBlackPawnMove(p *Position, from, to int) {
+func (list *Movelist) addBlackPawnMove(p *Position, from, to int) {
 	if rankLookups[from] == RANK_2 {
 		list.addCaptureMove(p, newMovekey(from, to, EMPTY, bQ, false, false))
 		list.addCaptureMove(p, newMovekey(from, to, EMPTY, bR, false, false))
@@ -92,9 +93,9 @@ func (list *movelist) addBlackPawnMove(p *Position, from, to int) {
 	}
 }
 
-func (p *Position) generateAllMoves() *movelist {
+func (p *Position) GenerateAllMoves() *Movelist {
 
-	list := &movelist{}
+	list := &Movelist{}
 
 	// castling
 	if p == nil {

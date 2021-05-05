@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"fmt"
@@ -20,7 +20,7 @@ about a player's move into 64 bits
 0000 0000 xxxx 0000 0000 0000 0000 0000 -> Promoted Piece (piece)
 0000 000x 0000 0000 0000 0000 0000 0000 -> Castle
 
-Hexidecimal is easier to count
+Hexidecimal is easier to Count
 
 0 -- 1 -- 8 -- 5 -- C -- 5 -- 8 -- f -- -> 0x185C58f
 0000 0001 1000 0101 1100 0101 1000 1111

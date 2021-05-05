@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -85,9 +85,3 @@ func TestBitboard64(t *testing.T) {
 		assert.False(t, b.has(2))
 	})
 }
-
-//func TestBitboard64_String(t *testing.T) {
-//	b := &bitboard64{}
-//	b.set(sq120to64[21])
-//	fmt.Println(b)
-//}

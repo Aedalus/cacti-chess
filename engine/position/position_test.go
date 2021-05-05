@@ -1,4 +1,4 @@
-package engine
+package position
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 func TestPosition_GenPosKey(t *testing.T) {
 	t.Run("it generates a unique id for each item in the piece array", func(t *testing.T) {
 
-		// store the key -> input to check for unique keys
+		// store the Key -> input to check for unique keys
 		result := map[uint64]int{}
 
 		// Check for all pieces
@@ -30,8 +30,8 @@ func TestPosition_GenPosKey(t *testing.T) {
 		}
 	})
 
-	t.Run("it generates a unique key based on current side", func(t *testing.T) {
-		// store the key -> input to check for unique keys
+	t.Run("it generates a unique Key based on current side", func(t *testing.T) {
+		// store the Key -> input to check for unique keys
 		result := map[uint64]int{}
 		s := Position{
 			pieces:     &board120{},
@@ -47,8 +47,8 @@ func TestPosition_GenPosKey(t *testing.T) {
 
 		assert.Equal(t, 2, len(result))
 	})
-	t.Run("it generates a unique key based on castlePerms", func(t *testing.T) {
-		// store the key -> input to check for unique keys
+	t.Run("it generates a unique Key based on castlePerms", func(t *testing.T) {
+		// store the Key -> input to check for unique keys
 		result := map[uint64]int{}
 
 		for cp := 0; cp < 16; cp++ {
@@ -125,7 +125,7 @@ func TestPosition_Reset(t *testing.T) {
 
 func TestPosition_String(t *testing.T) {
 	fen := "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq c6 0 2"
-	state, err := ParseFen(fen)
+	state, err := FromFen(fen)
 
 	assert.Nil(t, err)
 	fmt.Println(state)
@@ -133,7 +133,7 @@ func TestPosition_String(t *testing.T) {
 
 func TestUpdateListsMaterial(t *testing.T) {
 	fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-	state, err := ParseFen(fen)
+	state, err := FromFen(fen)
 
 	assert.Nil(t, err)
 
@@ -159,7 +159,7 @@ func TestUpdateListsMaterial(t *testing.T) {
 
 func TestAssertCache(t *testing.T) {
 	fen := "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQKq - 0 1"
-	state, err := ParseFen(fen)
+	state, err := FromFen(fen)
 	assert.Nil(t, err)
 
 	assert.Nil(t, state.assertCache())
