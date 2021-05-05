@@ -125,6 +125,8 @@ func (p *Position) updateListCaches() {
 
 // will panic if the cache isn't right. used for debugging
 func (p *Position) assertCache() error {
+	//todo - comment out
+	return nil
 	// temporary values we recompute to check against
 	t_pieceCount := [13]int{}
 	t_pieceList := [13][10]int{}

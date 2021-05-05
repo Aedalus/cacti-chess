@@ -30,9 +30,9 @@ func (p *Position) perftRecursive(totalDepth, depth int) int {
 			continue
 		}
 
-		if depth != totalDepth {
-			perftSubmoves[perftSection] += mlist.moves[i].key.ShortString() + ","
-		}
+		//if depth != totalDepth {
+		//	perftSubmoves[perftSection] += mlist.moves[i].key.ShortString() + ","
+		//}
 
 		childNodes += p.perftRecursive(totalDepth, depth-1)
 		p.UndoMove()

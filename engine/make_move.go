@@ -220,23 +220,28 @@ func (p *Position) MakeMove(move *movekey) bool {
 	p.hisPly++
 	p.searchPly++
 
-	// update new enPas square
+	// If it was a pawn move, reset to 0
 	if pce == wP || pce == bP {
 		p.fiftyMove = 0
-		if move.isEnPas() {
-			if side == WHITE {
-				p.enPas = to - 10
-			} else {
-				p.enPas = to + 10
-			}
-		}
-		// hash ep?
 	}
 
 	// capture piece
 	if captured != EMPTY {
 		p.clearPiece(to)
 		p.fiftyMove = 0
+
+		// check castle perms on capture for rooks
+		// todo - optimize
+		switch to {
+		case A1:
+			p.castlePerm.Clear(CASTLE_PERMS_WQ)
+		case H1:
+			p.castlePerm.Clear(CASTLE_PERMS_WK)
+		case A8:
+			p.castlePerm.Clear(CASTLE_PERMS_BQ)
+		case H8:
+			p.castlePerm.Clear(CASTLE_PERMS_BK)
+		}
 	}
 
 	// move piece very last, after clearing capture
@@ -272,6 +277,10 @@ func (p *Position) MakeMove(move *movekey) bool {
 		return false
 	}
 
+	if p.enPas == 55 {
+		fmt.Println("huh")
+		panic("uh oh")
+	}
 	return true
 }
 
@@ -302,7 +311,7 @@ func (p *Position) UndoMove() {
 		if p.side == WHITE {
 			p.addPiece(to-10, bP)
 		} else {
-			p.addPiece(to+10, bP)
+			p.addPiece(to+10, wP)
 		}
 	}
 

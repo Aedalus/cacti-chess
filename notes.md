@@ -5,5 +5,6 @@
 - eliminate p.pieceCount and just use slices
     - need perf tests first
 - speed up hashes in make_move
+- Need to eliminate newMoveKey, just generate the int type. Taking too much cpu/memory
 
 // 5071866835353602606

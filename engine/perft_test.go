@@ -14,48 +14,11 @@ import (
 type testCasePerft struct {
 	lineNumber int
 	fen        string
-	depths     [6]int
+	depths     [7]int
 }
 
 func (t *testCasePerft) String() string {
 	return fmt.Sprintf("%v | %v\n", t.fen, t.depths)
-}
-
-func getPerftTestCases(t *testing.T) []*testCasePerft {
-	file, err := os.OpenFile("perft_test.txt", os.O_RDONLY, 0644)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-
-	testCases := []*testCasePerft{}
-
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		ln := scanner.Text()
-
-		segments := strings.Split(ln, ";")
-		require.Equal(t, 7, len(segments))
-
-		tc := &testCasePerft{}
-		tc.fen = strings.TrimSpace(segments[0])
-
-		// todo - parse depths
-		for i := 0; i < 6; i++ {
-			sg := segments[i+1]
-			str := strings.ReplaceAll(sg, fmt.Sprintf("D%d", i+1), "")
-			str = strings.TrimSpace(str)
-			d, err := strconv.Atoi(str)
-			if err != nil {
-				panic(err)
-			}
-			tc.depths[i] = d
-		}
-
-		testCases = append(testCases, tc)
-	}
-
-	return testCases
 }
 
 func getPerftTestCases2(t *testing.T) []*testCasePerft {
@@ -81,13 +44,17 @@ func getPerftTestCases2(t *testing.T) []*testCasePerft {
 		tc.lineNumber = lineNumber
 
 		// todo - parse depths
-		for i := 0; i < 6; i++ {
-			sg := segments[i+1]
-			d, err := strconv.Atoi(sg)
-			if err != nil {
-				panic(err)
+		for i := 0; i < 7; i++ {
+			if i == 0 {
+				tc.depths[i] = 1
+			} else {
+				sg := segments[i]
+				d, err := strconv.Atoi(sg)
+				if err != nil {
+					panic(err)
+				}
+				tc.depths[i] = d
 			}
-			tc.depths[i] = d
 		}
 
 		testCases = append(testCases, tc)
@@ -97,19 +64,20 @@ func getPerftTestCases2(t *testing.T) []*testCasePerft {
 }
 
 func Test_Perft_All(t *testing.T) {
-	depth := 2
 	tsc := getPerftTestCases2(t)
 
-	for _, tc := range tsc {
-		p, err := ParseFen(tc.fen)
-		require.Nil(t, err)
+	for depth := 0; depth < 6; depth++ {
+		for _, tc := range tsc {
+			p, err := ParseFen(tc.fen)
+			require.Nil(t, err)
 
-		got := p.Perft(depth)
-		want := tc.depths[depth-1]
-		if want != got {
-			t.Fatalf("perft error (line %d): %v | got %v, want %v\n", tc.lineNumber, tc.fen, got, want)
-		} else {
-			fmt.Printf("%d | %v: got %v want %v\n", tc.lineNumber, tc.fen, got, want)
+			got := p.Perft(depth)
+			want := tc.depths[depth]
+			if want != got {
+				t.Fatalf("perft error (line %d depth %d): %v | got %v, want %v\n", tc.lineNumber, depth, tc.fen, got, want)
+			} else {
+				fmt.Printf("%d %d | %v: got %v want %v\n", depth, tc.lineNumber, tc.fen, got, want)
+			}
 		}
 	}
 }
@@ -124,48 +92,65 @@ func Test_Perft_StartingPos(t *testing.T) {
 	assert.Equal(t, 8902, p.Perft(3))
 	assert.Equal(t, 197281, p.Perft(4))
 	assert.Equal(t, 4865609, p.Perft(5))
+	//assert.Equal(t, 119060324, p.Perft(6))
+
 }
 
 func Test_Perft_Sample_A(t *testing.T) {
-	fen := "2b1kbnB/rppqp3/3p3p/3P1pp1/pnP3P1/PP2P2P/4QP2/RN2KBNR b KQ - 0 1"
+	fen := "r3kbnr/2qn2p1/8/pppBpp1P/3P1Pb1/P1P1P3/1P2Q2P/RNB1K1NR w KQkq - 0 1"
 	p, err := ParseFen(fen)
 	require.Nil(t, err)
 
-	// movegen isn't picking up enPas after c7 c5
+	pft := p.Perft(2)
 	want := map[string]int{
-		"f5f4": 28,
-		"h6h5": 30,
-		"b7b6": 29,
-		"c7c6": 30,
-		"e7e6": 30,
-		"b7b5": 30,
-		"c7c5": 29,
-		"e7e5": 27,
-		"a4b3": 29,
-		"f5g4": 30,
-		"b4a2": 29,
-		"b4c2": 3,
-		"b4d3": 3,
-		"b4d5": 30,
-		"b4a6": 29,
-		"b4c6": 30,
-		"g8f6": 25,
-		"f8g7": 24,
-		"a7a5": 29,
-		"a7a6": 29,
-		"a7a8": 29,
-		"d7b5": 30,
-		"d7c6": 30,
-		"d7e6": 30,
-		"d7d8": 29,
-		"e8f7": 29,
-		"e8d8": 29,
+		"b2b3": 40,
+		"h2h3": 40,
+		"a3a4": 40,
+		"c3c4": 40,
+		"e3e4": 40,
+		"h5h6": 40,
+		"b2b4": 41,
+		"h2h4": 40,
+		"d4e5": 38,
+		"d4c5": 40,
+		"f4e5": 40,
+		"b1d2": 40,
+		"g1f3": 39,
+		"g1h3": 40,
+		"c1d2": 40,
+		"d5a2": 40,
+		"d5g2": 41,
+		"d5b3": 40,
+		"d5f3": 40,
+		"d5c4": 40,
+		"d5e4": 41,
+		"d5c6": 38,
+		"d5e6": 40,
+		"d5b7": 39,
+		"d5f7": 3,
+		"d5a8": 35,
+		"d5g8": 38,
+		"a1a2": 40,
+		"e2d1": 41,
+		"e2f1": 41,
+		"e2c2": 41,
+		"e2d2": 41,
+		"e2f2": 41,
+		"e2g2": 41,
+		"e2d3": 41,
+		"e2f3": 39,
+		"e2c4": 41,
+		"e2g4": 37,
+		"e2b5": 37,
+		"e1d1": 40,
+		"e1f1": 40,
+		"e1d2": 40,
+		"e1f2": 40,
 	}
-
-	p.Perft(2)
+	assert.Equal(t, 1674, pft)
 	assert.Equal(t, want, perftCounts)
+	fmt.Println(perftCounts)
 	fmt.Println(perftSubmoves)
-	//assert.Equal(t, 729, p.Perft(2))
 }
 
 func Test_Perft_Sample_B(t *testing.T) {
@@ -176,9 +161,9 @@ func Test_Perft_Sample_B(t *testing.T) {
 		expected int
 	}{
 		{
-			"c7c5",
-			"2b1kbnB/rp1qp3/3p3p/2pP1pp1/pnP3P1/PP2P2P/4QP2/RN2KBNR w KQ c6 0 2",
-			29,
+			"d4e3",
+			"r2n3r/1bNk2pp/6P1/pP3p2/5qnP/1P1Ppp1R/2P3B1/Q1B1bKN1 w - - 0 2",
+			36,
 		},
 	}
 
