@@ -1,6 +1,7 @@
 package main
 
 import (
+	"cacti-chess/engine/position"
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -16,6 +17,28 @@ func main() {
 			return nil
 		},
 		Commands: []*cli.Command{
+			{
+				Name:  "playground",
+				Usage: "allows a game to be played adding moves for both sides",
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:        "fen",
+						Aliases:     []string{"f"},
+						Usage:       "an optional fen to start from",
+						DefaultText: "A",
+					},
+				},
+				Action: func(c *cli.Context) error {
+					fen := c.String("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+					p, err := position.FromFen(fen)
+					if err != nil {
+						log.Fatalf("could not parse fen: %v", err)
+					}
+
+					p.PrintBoard()
+					return nil
+				},
+			},
 			//{
 			//	Name:    "draw-fen",
 			//	Aliases: []string{"d"},

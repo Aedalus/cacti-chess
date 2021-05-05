@@ -162,5 +162,5 @@ func TestAssertCache(t *testing.T) {
 	state, err := FromFen(fen)
 	assert.Nil(t, err)
 
-	assert.Nil(t, state.assertCache())
+	assert.Nil(t, state.AssertCache())
 }

@@ -2,6 +2,7 @@ package position
 
 import (
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"testing"
 )
 
@@ -199,4 +200,55 @@ func Test_printMove(t *testing.T) {
 	want += "captured: EMPTY\n"
 	want += "promoted: EMPTY\n"
 	assert.Equal(t, want, m.String())
+}
+
+func Test_ParseMove(t *testing.T) {
+	t.Run("will return no move for not found", func(t *testing.T) {
+		p, err := FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+		require.Nil(t, err)
+
+		move, err := p.parseMove("a1a8")
+		require.Nil(t, err)
+		assert.Equal(t, move, &movekey{0})
+	})
+
+	t.Run("it will find basic moves", func(t *testing.T) {
+		p, err := FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+		require.Nil(t, err)
+
+		move, err := p.parseMove("a2a4")
+		require.Nil(t, err)
+		assert.NotNil(t, move)
+
+		assert.Equal(t, A2, move.getFrom())
+		assert.Equal(t, A4, move.getTo())
+	})
+
+	t.Run("it will find castle moves", func(t *testing.T) {
+		p, err := FromFen("rnbqkbn1/pppppppP/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+		require.Nil(t, err)
+
+		for _, tc := range []struct {
+			pce     string
+			promPce piece
+		}{
+			{"n", wN},
+			{"q", wQ},
+			{"r", wR},
+			{"b", wB},
+		} {
+			str := "h7h8" + tc.pce
+			move, err := p.parseMove(str)
+			assert.Nil(t, err)
+			assert.Equal(t, H7, move.getFrom())
+			assert.Equal(t, H8, move.getTo())
+			assert.Equal(t, tc.promPce, move.getPromoted())
+		}
+		move, err := p.parseMove("a2a4")
+		require.Nil(t, err)
+		assert.NotNil(t, move)
+
+		assert.Equal(t, A2, move.getFrom())
+		assert.Equal(t, A4, move.getTo())
+	})
 }

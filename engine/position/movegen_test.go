@@ -23,8 +23,8 @@ func (tc testCaseMoveGen) assert(t *testing.T) {
 		panic("p should not be nil")
 	}
 
-	mlist := p.generateAllMoves()
-	assert.Equal(t, tc.expected, mlist.count)
+	mlist := p.GenerateAllMoves()
+	assert.Equal(t, tc.expected, len(*mlist))
 }
 
 func Test_MoveGen_MovelistCount(t *testing.T) {

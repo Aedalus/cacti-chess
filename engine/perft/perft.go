@@ -19,23 +19,18 @@ func perftRecursive(p *position.Position, totalDepth, depth int) int {
 	}
 
 	childNodes := 0
-	mlist := p.GenerateAllMoves()
+	movelist := p.GenerateAllMoves()
 
 	// iterate all moves, depth first search
-	for i := 0; i < mlist.Count; i++ {
+	for _, mv := range *movelist {
 		if depth == totalDepth {
-			perftSection = mlist.Moves[i].Key.ShortString()
-
+			perftSection = mv.Key.ShortString()
 		}
 
 		// if the move leaves us in check, forget it
-		if !p.MakeMove(mlist.Moves[i].Key) {
+		if !p.MakeMove(mv.Key) {
 			continue
 		}
-
-		//if depth != totalDepth {
-		//	perftSubmoves[perftSection] += mlist.moves[i].key.ShortString() + ","
-		//}
 
 		childNodes += perftRecursive(p, totalDepth, depth-1)
 		p.UndoMove()

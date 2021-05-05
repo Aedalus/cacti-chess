@@ -36,6 +36,57 @@ func newCastleMoveKey(from, to int) *movekey {
 	k.setCastle()
 	return k
 }
+
+func (p *Position) parseMove(str string) (*movekey, error) {
+	mvb := []rune(str)
+	if mvb[0] > 'h' || mvb[0] < 'a' {
+		return nil, fmt.Errorf("str[0] must be a <= x <= h")
+	}
+	if mvb[1] > '8' || mvb[1] < '1' {
+		return nil, fmt.Errorf("str[1] must be 1 <= x <= 8")
+	}
+	if mvb[2] > 'h' || mvb[2] < 'a' {
+		return nil, fmt.Errorf("str[2] must be a <= x <= h")
+	}
+	if mvb[3] > '8' || mvb[3] < '1' {
+		return nil, fmt.Errorf("str[3] must be 1 <= x <= 8")
+	}
+
+	from := fileRankToSq(int(mvb[0]-'a'), int(mvb[1]-'1'))
+	to := fileRankToSq(int(mvb[2]-'a'), int(mvb[3]-'1'))
+	prChar := ' '
+	if len(mvb) > 4 {
+		prChar = mvb[4]
+	}
+
+	possibleMoves := p.GenerateAllMoves()
+
+	for _, mv := range *possibleMoves {
+		// find a matching to/from move
+		if mv.Key.getFrom() != from || mv.Key.getTo() != to {
+			continue
+		}
+		// check if it was promoted
+		pr := mv.Key.getPromoted()
+		if pr != EMPTY {
+			if (pr == wR || pr == bR) && prChar == 'r' {
+				return mv.Key, nil
+			} else if (pr == wQ || pr == bQ) && prChar == 'q' {
+				return mv.Key, nil
+			} else if (pr == wN || pr == bN) && prChar == 'n' {
+				return mv.Key, nil
+			} else if (pr == wB || pr == bB) && prChar == 'b' {
+				return mv.Key, nil
+			}
+			continue
+		} else {
+			return mv.Key, nil
+		}
+	}
+
+	return &movekey{0}, nil
+}
+
 func newMovekey(from, to int, captured, promoted piece, enPas, pawnStart bool) *movekey {
 	k := &movekey{}
 
@@ -177,4 +228,9 @@ func (m *movekey) getPromoted() piece {
 
 func (m *movekey) setPromoted(p piece) {
 	m.val = m.val & ^moveKeyPromotedPieceBitmask | (uint64(p) << 20)
+}
+
+// no move
+func (m *movekey) isNoMove() bool {
+	return m.val == 0
 }
