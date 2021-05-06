@@ -25,31 +25,29 @@ Hexidecimal is easier to Count
 0 -- 1 -- 8 -- 5 -- C -- 5 -- 8 -- f -- -> 0x185C58f
 0000 0001 1000 0101 1100 0101 1000 1111
 */
-type movekey struct {
-	val uint64
-}
+type movekey uint64
 
-func newCastleMoveKey(from, to int) *movekey {
-	k := &movekey{}
-	k.setFrom(from)
-	k.setTo(to)
-	k.setCastle()
-	return k
-}
+//func newCastleMoveKey(from, to int) *movekey {
+//	k := &movekey{}
+//	k.setFrom(from)
+//	k.setTo(to)
+//	k.setCastle()
+//	return k
+//}
 
-func (p *Position) parseMove(str string) (*movekey, error) {
+func (p *Position) ParseMove(str string) (movekey, error) {
 	mvb := []rune(str)
 	if mvb[0] > 'h' || mvb[0] < 'a' {
-		return nil, fmt.Errorf("str[0] must be a <= x <= h")
+		return movekey(0), fmt.Errorf("str[0] must be a <= x <= h")
 	}
 	if mvb[1] > '8' || mvb[1] < '1' {
-		return nil, fmt.Errorf("str[1] must be 1 <= x <= 8")
+		return movekey(0), fmt.Errorf("str[1] must be 1 <= x <= 8")
 	}
 	if mvb[2] > 'h' || mvb[2] < 'a' {
-		return nil, fmt.Errorf("str[2] must be a <= x <= h")
+		return movekey(0), fmt.Errorf("str[2] must be a <= x <= h")
 	}
 	if mvb[3] > '8' || mvb[3] < '1' {
-		return nil, fmt.Errorf("str[3] must be 1 <= x <= 8")
+		return movekey(0), fmt.Errorf("str[3] must be 1 <= x <= 8")
 	}
 
 	from := fileRankToSq(int(mvb[0]-'a'), int(mvb[1]-'1'))
@@ -84,27 +82,27 @@ func (p *Position) parseMove(str string) (*movekey, error) {
 		}
 	}
 
-	return &movekey{0}, nil
+	return movekey(0), nil
 }
 
-func newMovekey(from, to int, captured, promoted piece, enPas, pawnStart bool) *movekey {
-	k := &movekey{}
-
-	k.setFrom(from)
-	k.setTo(to)
-	k.setCaptured(captured)
-	k.setPromoted(promoted)
-
-	if enPas {
-		k.setEnPas()
-	}
-
-	if pawnStart {
-		k.setPawnStart()
-	}
-
-	return k
-}
+//func newMovekey(from, to int, captured, promoted piece, enPas, pawnStart bool) *movekey {
+//	k := &movekey{}
+//
+//	k.setFrom(from)
+//	k.setTo(to)
+//	k.setCaptured(captured)
+//	k.setPromoted(promoted)
+//
+//	if enPas {
+//		k.setEnPas()
+//	}
+//
+//	if pawnStart {
+//		k.setPawnStart()
+//	}
+//
+//	return k
+//}
 
 func (m *movekey) ShortString() string {
 	str := fmt.Sprintf("%s%s", printSq(m.getFrom()), printSq(m.getTo()))
@@ -164,73 +162,73 @@ const (
 )
 
 // from
-func (m *movekey) getFrom() int {
-	return int(m.val & moveKeyFromBitmask)
+func (m movekey) getFrom() int {
+	return int(uint64(m) & moveKeyFromBitmask)
 }
-func (m *movekey) setFrom(sq int) {
-	m.val = (m.val & ^moveKeyFromBitmask) | uint64(sq)
+func (m movekey) setFrom(sq int) movekey {
+	return movekey((uint64(m) & ^moveKeyFromBitmask) | uint64(sq))
 }
 
 // to
-func (m *movekey) getTo() int {
-	return int((m.val & moveKeyToBitmask) >> 7)
+func (m movekey) getTo() int {
+	return int((uint64(m) & moveKeyToBitmask) >> 7)
 }
-func (m *movekey) setTo(sq int) {
-	m.val = (m.val & ^ moveKeyToBitmask) | (uint64(sq << 7))
+func (m movekey) setTo(sq int) movekey {
+	return movekey((uint64(m) & ^ moveKeyToBitmask) | (uint64(sq << 7)))
 }
 
 // enPas
-func (m *movekey) isEnPas() bool {
-	return m.val&moveKeyEnPasBitmask != 0
+func (m movekey) isEnPas() bool {
+	return uint64(m)&moveKeyEnPasBitmask != 0
 }
-func (m *movekey) setEnPas() {
-	m.val = m.val | moveKeyEnPasBitmask
+func (m movekey) setEnPas() movekey {
+	return movekey(uint64(m) | moveKeyEnPasBitmask)
 }
-func (m *movekey) clearEnPas() {
-	m.val = m.val & ^moveKeyEnPasBitmask
+func (m movekey) clearEnPas() movekey {
+	return movekey(uint64(m) & ^moveKeyEnPasBitmask)
 }
 
 // pawnStart
-func (m *movekey) isPawnStart() bool {
-	return m.val&moveKeyPawnStartBitmask != 0
+func (m movekey) isPawnStart() bool {
+	return uint64(m)&moveKeyPawnStartBitmask != 0
 }
-func (m *movekey) setPawnStart() {
-	m.val = m.val | moveKeyPawnStartBitmask
+func (m movekey) setPawnStart() movekey {
+	return movekey(uint64(m) | moveKeyPawnStartBitmask)
 }
-func (m *movekey) clearPawnStart() {
-	m.val = m.val & ^ moveKeyPawnStartBitmask
+func (m movekey) clearPawnStart() movekey {
+	return movekey(uint64(m) & ^ moveKeyPawnStartBitmask)
 }
 
 // castle
-func (m *movekey) isCastle() bool {
-	return m.val&moveKeyCastleBitmask != 0
+func (m movekey) isCastle() bool {
+	return uint64(m)&moveKeyCastleBitmask != 0
 }
-func (m *movekey) setCastle() {
-	m.val = m.val | moveKeyCastleBitmask
+func (m movekey) setCastle() movekey {
+	return movekey(uint64(m) | moveKeyCastleBitmask)
 }
-func (m *movekey) clearCastle() {
-	m.val = m.val & ^ moveKeyCastleBitmask
+func (m movekey) clearCastle() movekey {
+	return movekey(uint64(m) & ^ moveKeyCastleBitmask)
 }
 
 // captured
-func (m *movekey) getCaptured() piece {
-	return piece((m.val & moveKeyCapturedBitmask) >> 14)
+func (m movekey) getCaptured() piece {
+	return piece((uint64(m) & moveKeyCapturedBitmask) >> 14)
 }
 
-func (m *movekey) setCaptured(p piece) {
-	m.val = m.val & ^moveKeyCapturedBitmask | (uint64(p) << 14)
+func (m movekey) setCaptured(p piece) movekey {
+	return movekey(uint64(m) & ^moveKeyCapturedBitmask | (uint64(p) << 14))
 }
 
 // promoted
-func (m *movekey) getPromoted() piece {
-	return piece((m.val & moveKeyPromotedPieceBitmask) >> 20)
+func (m movekey) getPromoted() piece {
+	return piece((uint64(m) & moveKeyPromotedPieceBitmask) >> 20)
 }
 
-func (m *movekey) setPromoted(p piece) {
-	m.val = m.val & ^moveKeyPromotedPieceBitmask | (uint64(p) << 20)
+func (m movekey) setPromoted(p piece) movekey {
+	return movekey(uint64(m) & ^moveKeyPromotedPieceBitmask | (uint64(p) << 20))
 }
 
 // no move
-func (m *movekey) isNoMove() bool {
-	return m.val == 0
+func (m movekey) IsNoMove() bool {
+	return m == 0
 }

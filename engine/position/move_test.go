@@ -12,11 +12,11 @@ func Test_movekey(t *testing.T) {
 	t.Run("from-get", func(t *testing.T) {
 		// test that its right if no flag has been set
 		for i := 0; i < BOARD_SQ_NUMBER; i++ {
-			k := &movekey{uint64(i)}
+			k := movekey(i)
 			assert.Equal(t, i, k.getFrom())
 
 			// make sure other keys don't mess it up
-			k.val = k.val | 1<<7
+			k = k | 1<<7
 			assert.Equal(t, i, k.getFrom())
 		}
 	})
@@ -24,16 +24,14 @@ func Test_movekey(t *testing.T) {
 	t.Run("from-set", func(t *testing.T) {
 		// test that its right if no flag has been set
 		for i := 0; i < BOARD_SQ_NUMBER; i++ {
-			k := &movekey{}
-			k.setFrom(i)
-			assert.Equal(t, uint64(i), k.val)
+			k := movekey(0).setFrom(i)
+			assert.Equal(t, movekey(i), k)
 			assert.Equal(t, i, k.getFrom())
-			assert.Equal(t, uint64(0), k.val & ^moveKeyFromBitmask)
+			assert.Equal(t, uint64(0), uint64(k) & ^moveKeyFromBitmask)
 
-			j := &movekey{maxUInt64}
-			j.setFrom(i)
+			j := movekey(maxUInt64).setFrom(i)
 			assert.Equal(t, i, j.getFrom())
-			assert.True(t, j.val&^moveKeyFromBitmask == ^moveKeyFromBitmask)
+			assert.True(t, uint64(j)&^moveKeyFromBitmask == ^moveKeyFromBitmask)
 		}
 	})
 
@@ -41,12 +39,11 @@ func Test_movekey(t *testing.T) {
 		// test that its right if no flag has been set
 		for i := 0; i < 65; i++ {
 			val := uint64(i << 7)
-			k := &movekey{val}
-			//fmt.Println(val, val>>7)
+			k := movekey(val)
 			assert.Equal(t, i, k.getTo())
 
 			// make sure other keys don't mess it up
-			k.val = k.val | 1
+			k = movekey(uint64(k) | 1)
 			assert.Equal(t, i, k.getTo())
 		}
 	})
@@ -54,143 +51,138 @@ func Test_movekey(t *testing.T) {
 	t.Run("to-set", func(t *testing.T) {
 		// test that its right if no flag has been set
 		for i := 0; i < BOARD_SQ_NUMBER; i++ {
-			k := &movekey{}
-			k.setTo(i)
-			assert.Equal(t, uint64(i)<<7, k.val)
+			k := movekey(0).setTo(i)
+			assert.Equal(t, movekey(i)<<7, k)
 			assert.Equal(t, i, k.getTo())
-			assert.Equal(t, uint64(0), k.val & ^moveKeyToBitmask)
+			assert.Equal(t, uint64(0), uint64(k) & ^moveKeyToBitmask)
 
-			j := &movekey{maxUInt64}
-			j.setTo(i)
+			j := movekey(maxUInt64).setTo(i)
 			assert.Equal(t, i, j.getTo())
-			assert.True(t, j.val&^moveKeyToBitmask == ^moveKeyToBitmask)
+			assert.True(t, uint64(j)&^moveKeyToBitmask == ^moveKeyToBitmask)
 		}
 
 		// test that it preserves flags
-		k := &movekey{}
-		k.val = k.val | uint64(1)
-		assert.Equal(t, uint64(1), k.val)
+		k := movekey(0)
+		k = movekey(uint64(k) | uint64(1))
+		assert.Equal(t, movekey(1), k)
 
-		k.setTo(2)
-		assert.Equal(t, uint64(0x101), k.val)
+		k = k.setTo(2)
+		assert.Equal(t, movekey(0x101), k)
 
-		k.setTo(4)
-		assert.Equal(t, uint64(0x201), k.val)
+		k = k.setTo(4)
+		assert.Equal(t, movekey(0x201), k)
 	})
 
 	t.Run("enPas", func(t *testing.T) {
-		k := &movekey{}
+		k := movekey(0)
 
-		assert.Equal(t, uint64(0), k.val)
+		assert.Equal(t, movekey(0), k)
 		assert.False(t, k.isEnPas())
 
-		k.setEnPas()
-		assert.Equal(t, uint64(1<<18), k.val)
+		k = k.setEnPas()
+		assert.Equal(t, movekey(1<<18), k)
 		assert.True(t, k.isEnPas())
-		assert.Equal(t, uint64(0), k.val & ^moveKeyEnPasBitmask)
+		assert.Equal(t, uint64(0), uint64(k) & ^moveKeyEnPasBitmask)
 
-		k.clearEnPas()
-		assert.Equal(t, uint64(0), k.val)
+		k = k.clearEnPas()
+		assert.Equal(t, movekey(0), k)
 		assert.False(t, k.isEnPas())
 
-		j := &movekey{maxUInt64}
+		j := movekey(maxUInt64)
 		assert.True(t, j.isEnPas())
 
-		j.clearEnPas()
-		assert.Equal(t, maxUInt64 & ^uint64(1<<18), j.val)
+		j = j.clearEnPas()
+		assert.Equal(t, movekey(maxUInt64 & ^uint64(1<<18)), j)
 	})
 
 	t.Run("pawnStart", func(t *testing.T) {
-		k := &movekey{}
+		k := movekey(0)
 
-		assert.Equal(t, uint64(0), k.val)
+		assert.Equal(t, uint64(0), uint64(k))
 		assert.False(t, k.isPawnStart())
 
-		k.setPawnStart()
-		assert.Equal(t, uint64(1<<19), k.val)
+		k = k.setPawnStart()
+		assert.Equal(t, movekey(1<<19), k)
 		assert.True(t, k.isPawnStart())
-		assert.Equal(t, uint64(0), k.val & ^moveKeyPawnStartBitmask)
+		assert.Equal(t, uint64(0), uint64(k) & ^moveKeyPawnStartBitmask)
 
-		k.clearPawnStart()
-		assert.Equal(t, uint64(0), k.val)
+		k = k.clearPawnStart()
+		assert.Equal(t, movekey(0), k)
 		assert.False(t, k.isPawnStart())
 
-		j := &movekey{maxUInt64}
+		j := movekey(maxUInt64)
 		assert.True(t, j.isPawnStart())
-		j.clearPawnStart()
-		assert.Equal(t, maxUInt64 & ^uint64(1<<19), j.val)
+		j = j.clearPawnStart()
+		assert.Equal(t, movekey(maxUInt64 & ^uint64(1<<19)), j)
 	})
 
 	t.Run("castle", func(t *testing.T) {
-		k := &movekey{}
+		k := movekey(0)
 
-		assert.Equal(t, uint64(0), k.val)
+		assert.Equal(t, uint64(0), uint64(k))
 		assert.False(t, k.isCastle())
 
-		k.setCastle()
-		assert.Equal(t, uint64(1<<24), k.val)
+		k = k.setCastle()
+		assert.Equal(t, movekey(1<<24), k)
 		assert.True(t, k.isCastle())
 
-		k.clearCastle()
-		assert.Equal(t, uint64(0), k.val)
+		k = k.clearCastle()
+		assert.Equal(t, movekey(0), k)
 		assert.False(t, k.isCastle())
 
-		j := &movekey{maxUInt64}
+		j := movekey(maxUInt64)
 		assert.True(t, j.isCastle())
-		j.clearCastle()
-		assert.Equal(t, maxUInt64 & ^uint64(1<<24), j.val)
+		j = j.clearCastle()
+		assert.Equal(t, movekey(maxUInt64 & ^uint64(1<<24)), j)
 	})
 
 	t.Run("capture", func(t *testing.T) {
-		k := &movekey{}
-		j := &movekey{maxUInt64}
+		k := movekey(0)
+		j := movekey(maxUInt64)
 
 		for i := 0; i < PIECE_COUNT; i++ {
-			k.setCaptured(piece(i))
+			k = k.setCaptured(piece(i))
 			assert.Equal(t, piece(i), k.getCaptured())
-			k.setCaptured(EMPTY)
+			k = k.setCaptured(EMPTY)
 			assert.Equal(t, EMPTY, k.getCaptured())
-			assert.Equal(t, uint64(0), k.val & ^moveKeyCapturedBitmask)
+			assert.Equal(t, uint64(0), uint64(k) & ^moveKeyCapturedBitmask)
 
-			j.setCaptured(piece(i))
+			j = j.setCaptured(piece(i))
 			assert.Equal(t, piece(i), j.getCaptured())
-			j.setCaptured(EMPTY)
+			j = j.setCaptured(EMPTY)
 			assert.Equal(t, EMPTY, j.getCaptured())
-			assert.True(t, j.val & ^moveKeyCapturedBitmask == ^moveKeyCapturedBitmask)
+			assert.True(t, uint64(j) & ^moveKeyCapturedBitmask == ^moveKeyCapturedBitmask)
 		}
 	})
 
 	t.Run("promote", func(t *testing.T) {
-		k := &movekey{}
-		j := &movekey{maxUInt64}
+		k := movekey(0)
+		j := movekey(maxUInt64)
 
 		for i := 0; i < PIECE_COUNT; i++ {
-			k.setPromoted(piece(i))
+			k = k.setPromoted(piece(i))
 			assert.Equal(t, piece(i), k.getPromoted())
-			k.setPromoted(EMPTY)
+			k = k.setPromoted(EMPTY)
 			assert.Equal(t, EMPTY, k.getPromoted())
-			assert.Equal(t, uint64(0), k.val & ^moveKeyPromotedPieceBitmask)
+			assert.Equal(t, uint64(0), uint64(k) & ^moveKeyPromotedPieceBitmask)
 
-			j.setPromoted(piece(i))
+			j = j.setPromoted(piece(i))
 			assert.Equal(t, piece(i), j.getPromoted())
-			j.setPromoted(EMPTY)
+			j = j.setPromoted(EMPTY)
 			assert.Equal(t, EMPTY, j.getPromoted())
-			assert.True(t, j.val & ^moveKeyPromotedPieceBitmask == ^moveKeyPromotedPieceBitmask)
+			assert.True(t, uint64(j) & ^moveKeyPromotedPieceBitmask == ^moveKeyPromotedPieceBitmask)
 		}
 	})
 
 	t.Run("enPas doesn't override capture", func(t *testing.T) {
-		k := &movekey{}
-		k.setEnPas()
+		k := movekey(0).setEnPas()
 		cap := k.getCaptured()
 		assert.Equal(t, EMPTY, cap)
 	})
 }
 
 func Test_printMove(t *testing.T) {
-	m := &movekey{}
-	m.setFrom(A2)
-	m.setTo(A4)
+	m := movekey(0).setFrom(A2).setTo(A4)
 
 	want := "from: a2\n"
 	want += "to: a4\n"
@@ -207,16 +199,16 @@ func Test_ParseMove(t *testing.T) {
 		p, err := FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		require.Nil(t, err)
 
-		move, err := p.parseMove("a1a8")
+		move, err := p.ParseMove("a1a8")
 		require.Nil(t, err)
-		assert.Equal(t, move, &movekey{0})
+		assert.Equal(t, move, movekey(0))
 	})
 
 	t.Run("it will find basic moves", func(t *testing.T) {
 		p, err := FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		require.Nil(t, err)
 
-		move, err := p.parseMove("a2a4")
+		move, err := p.ParseMove("a2a4")
 		require.Nil(t, err)
 		assert.NotNil(t, move)
 
@@ -238,13 +230,13 @@ func Test_ParseMove(t *testing.T) {
 			{"b", wB},
 		} {
 			str := "h7h8" + tc.pce
-			move, err := p.parseMove(str)
+			move, err := p.ParseMove(str)
 			assert.Nil(t, err)
 			assert.Equal(t, H7, move.getFrom())
 			assert.Equal(t, H8, move.getTo())
 			assert.Equal(t, tc.promPce, move.getPromoted())
 		}
-		move, err := p.parseMove("a2a4")
+		move, err := p.ParseMove("a2a4")
 		require.Nil(t, err)
 		assert.NotNil(t, move)
 

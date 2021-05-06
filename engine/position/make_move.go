@@ -137,7 +137,7 @@ func (p *Position) movePiece(from, to int) {
 
 // MakeMove updates the position for a newly made
 // move. It returns false if a king is left in check.
-func (p *Position) MakeMove(move *movekey) bool {
+func (p *Position) MakeMove(move movekey) bool {
 	err := p.AssertCache()
 	if err != nil {
 		panic(err)
@@ -157,6 +157,9 @@ func (p *Position) MakeMove(move *movekey) bool {
 		if side == WHITE {
 			p.clearPiece(to - 10)
 		} else {
+			if p.pieces[to+10] == EMPTY {
+				fmt.Println("woops")
+			}
 			p.clearPiece(to + 10)
 		}
 	}
@@ -179,7 +182,7 @@ func (p *Position) MakeMove(move *movekey) bool {
 
 	// hash enPas?
 
-	p.history[p.hisPly].move = *move
+	p.history[p.hisPly].move = move
 	p.history[p.hisPly].fiftyMove = p.fiftyMove
 	p.history[p.hisPly].enPas = p.enPas
 	p.history[p.hisPly].castlePerm = *p.castlePerm

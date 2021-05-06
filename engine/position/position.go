@@ -400,3 +400,15 @@ func (p Position) PrintAttackBoard(attackingSide int) string {
 	}
 	return output.String()
 }
+
+func (p *Position) getRepetition() int {
+	count := 0
+
+	for _, his := range p.history {
+		if his.posKey == p.posKey {
+			count++
+		}
+	}
+
+	return count
+}

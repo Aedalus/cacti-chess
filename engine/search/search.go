@@ -1,14 +1,7 @@
 package search
 
-func Search(depth int) {
-	//curDepth := 1
-	//iterativeDeepen(depth)
-	//{
-	//	alphabeta(depth)
-	//	curDepth++
-	//}
-}
+import "cacti-chess/engine/position"
 
-func alphabeta(depth int) {
-	//if isRepeated()
+func SearchPos(p *position.Position) {
+
 }

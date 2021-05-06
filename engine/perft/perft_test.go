@@ -83,6 +83,7 @@ func Test_Perft_All(t *testing.T) {
 		}
 	}
 }
+
 func Test_Perft_StartingPos(t *testing.T) {
 	fen := "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 	p, err := position.FromFen(fen)
