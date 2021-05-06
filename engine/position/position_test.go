@@ -7,7 +7,7 @@ import (
 )
 
 func TestPosition_GenPosKey(t *testing.T) {
-	t.Run("it generates a unique id for each item in the piece array", func(t *testing.T) {
+	t.Run("it generates a unique id for each item in the Piece array", func(t *testing.T) {
 
 		// store the Key -> input to check for unique keys
 		result := map[uint64]int{}
@@ -20,12 +20,12 @@ func TestPosition_GenPosKey(t *testing.T) {
 					pieces:     &board120{},
 					castlePerm: &castlePerm{CASTLE_PERMS_ALL},
 				}
-				s.pieces[sq] = piece(p)
+				s.pieces[sq] = Piece(p)
 				key := s.GenPosKey()
 				result[key] = sq
 			}
 
-			// should have 120 unique keys per piece:pos combo
+			// should have 120 unique keys per Piece:pos combo
 			assert.Equal(t, 120*p, len(result))
 		}
 	})
@@ -142,7 +142,7 @@ func TestUpdateListsMaterial(t *testing.T) {
 	assert.Equal(t, [2]int{4, 4}, state.minPieceCount)
 	assert.Equal(t, [2]int{54210, 54210}, state.materialCount)
 
-	// check piece counts empty, wP, wB, wN, etc
+	// check Piece counts empty, PwP, PwB, PwN, etc
 	assert.Equal(t, [13]int{
 		0, 8, 2, 2, 2, 1, 1, 8, 2, 2, 2, 1, 1,
 	}, state.pieceCount)
@@ -150,11 +150,11 @@ func TestUpdateListsMaterial(t *testing.T) {
 	// spot check some white pieces
 	assert.Equal(t, [10]int{
 		31, 32, 33, 34, 35, 36, 37, 38, 0, 0,
-	}, state.pieceList[wP])
+	}, state.pieceList[PwP])
 
 	assert.Equal(t, [10]int{
 		21, 28, 0, 0, 0, 0, 0, 0, 0, 0,
-	}, state.pieceList[wR])
+	}, state.pieceList[PwR])
 }
 
 func TestAssertCache(t *testing.T) {

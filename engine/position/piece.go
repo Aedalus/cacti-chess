@@ -1,22 +1,22 @@
 package position
 
-type piece int8
+type Piece int8
 
 const PIECE_COUNT = 13
 const (
-	EMPTY piece = iota
-	wP
-	wN
-	wB
-	wR
-	wQ
-	wK
-	bP
-	bN
-	bB
-	bR
-	bQ
-	bK
+	EMPTY Piece = iota
+	PwP
+	PwN
+	PwB
+	PwR
+	PwQ
+	PwK
+	PbP
+	PbN
+	PbB
+	PbR
+	PbQ
+	PbK
 )
 
 type pieceMetadata struct {
@@ -32,22 +32,22 @@ type pieceMetadata struct {
 }
 
 // used for fast lookups without calling functions
-var pieceLookups = map[piece]pieceMetadata{
+var pieceLookups = map[Piece]pieceMetadata{
 	EMPTY: {
 		color: BOTH,
 	},
-	wP: {
+	PwP: {
 		color: WHITE,
 		value: 100,
 	},
-	wN: {
+	PwN: {
 		color:   WHITE,
 		isBig:   true,
 		isMinor: true,
 		value:   325,
 		dir:     []int{-8, -19, -21, -12, 8, 19, 21, 12},
 	},
-	wB: {
+	PwB: {
 		color:           WHITE,
 		isBig:           true,
 		isMinor:         true,
@@ -56,7 +56,7 @@ var pieceLookups = map[piece]pieceMetadata{
 		isBishopOrQueen: true,
 		dir:             []int{-9, -11, 9, 11},
 	},
-	wR: {
+	PwR: {
 		color:         WHITE,
 		isBig:         true,
 		isMajor:       true,
@@ -65,7 +65,7 @@ var pieceLookups = map[piece]pieceMetadata{
 		isRookOrQueen: true,
 		dir:           []int{-1, -10, 1, 10},
 	},
-	wQ: {
+	PwQ: {
 		color:           WHITE,
 		isBig:           true,
 		isMajor:         true,
@@ -75,25 +75,25 @@ var pieceLookups = map[piece]pieceMetadata{
 		isBishopOrQueen: true,
 		dir:             []int{-1, -10, 1, 10, -9, -11, 11, 9},
 	},
-	wK: {
+	PwK: {
 		color:   WHITE,
 		isBig:   true,
 		isMajor: true,
 		value:   50000,
 		dir:     []int{-1, -10, 1, 10, -9, -11, 11, 9},
 	},
-	bP: {
+	PbP: {
 		color: BLACK,
 		value: 100,
 	},
-	bN: {
+	PbN: {
 		color:   BLACK,
 		isBig:   true,
 		isMinor: true,
 		value:   325,
 		dir:     []int{-8, -19, -21, -12, 8, 19, 21, 12},
 	},
-	bB: {
+	PbB: {
 		color:           BLACK,
 		isBig:           true,
 		isMinor:         true,
@@ -102,7 +102,7 @@ var pieceLookups = map[piece]pieceMetadata{
 		isBishopOrQueen: true,
 		dir:             []int{-9, -11, 9, 11},
 	},
-	bR: {
+	PbR: {
 		color:         BLACK,
 		isBig:         true,
 		isMajor:       true,
@@ -111,7 +111,7 @@ var pieceLookups = map[piece]pieceMetadata{
 		isRookOrQueen: true,
 		dir:           []int{-1, -10, 1, 10},
 	},
-	bQ: {
+	PbQ: {
 		color:           BLACK,
 		isBig:           true,
 		isMajor:         true,
@@ -121,7 +121,7 @@ var pieceLookups = map[piece]pieceMetadata{
 		isBishopOrQueen: true,
 		dir:             []int{-1, -10, 1, 10, -9, -11, 11, 9},
 	},
-	bK: {
+	PbK: {
 		color:   BLACK,
 		isBig:   true,
 		isMajor: true,
@@ -130,33 +130,33 @@ var pieceLookups = map[piece]pieceMetadata{
 	},
 }
 
-func (p piece) String() string {
+func (p Piece) String() string {
 	switch p {
 	case EMPTY:
 		return "."
-	case wR:
+	case PwR:
 		return "R"
-	case wP:
+	case PwP:
 		return "P"
-	case wN:
+	case PwN:
 		return "N"
-	case wB:
+	case PwB:
 		return "B"
-	case wQ:
+	case PwQ:
 		return "Q"
-	case wK:
+	case PwK:
 		return "K"
-	case bP:
+	case PbP:
 		return "p"
-	case bN:
+	case PbN:
 		return "n"
-	case bB:
+	case PbB:
 		return "b"
-	case bR:
+	case PbR:
 		return "r"
-	case bQ:
+	case PbQ:
 		return "q"
-	case bK:
+	case PbK:
 		return "k"
 	default:
 		return "UNKNOWN"

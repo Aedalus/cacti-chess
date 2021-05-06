@@ -118,7 +118,7 @@ const (
 	H8 = 98
 )
 
-// directions for piece movement, used to calculate attacks
+// directions for Piece movement, used to calculate attacks
 var dirKnight = [8]int{-8, -19, -21, -12, 8, 19, 21, 12}
 var dirRook = [4]int{-1, -10, 1, 10}
 var dirBishop = [4]int{-9, -11, 11, 9}
@@ -127,7 +127,7 @@ var dirKing = [8]int{-1, -10, 1, 10, -9, -11, 11, 9}
 // these maps contain random uint64s for different combinations,
 // and they might not be the same through reboots. used to
 // generate the posKey from a engine state
-var hashPieceKeys [13][BOARD_SQ_NUMBER]uint64 // piece type/position
+var hashPieceKeys [13][BOARD_SQ_NUMBER]uint64 // Piece type/position
 var hashSideKey uint64                        // used if white's turn
 var hashCastleKeys [16]uint64                 // castleKeys
 

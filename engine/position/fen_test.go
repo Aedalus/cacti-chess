@@ -13,15 +13,15 @@ func Test_FenParsePiecesStr(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		want := [64]piece{
-			wR, wN, wB, wQ, wK, wB, wN, wR,
-			wP, wP, wP, wP, wP, wP, wP, wP,
+		want := [64]Piece{
+			PwR, PwN, PwB, PwQ, PwK, PwB, PwN, PwR,
+			PwP, PwP, PwP, PwP, PwP, PwP, PwP, PwP,
 			00, 00, 00, 00, 00, 00, 00, 00,
 			00, 00, 00, 00, 00, 00, 00, 00,
 			00, 00, 00, 00, 00, 00, 00, 00,
 			00, 00, 00, 00, 00, 00, 00, 00,
-			bP, bP, bP, bP, bP, bP, bP, bP,
-			bR, bN, bB, bQ, bK, bB, bN, bR,
+			PbP, PbP, PbP, PbP, PbP, PbP, PbP, PbP,
+			PbR, PbN, PbB, PbQ, PbK, PbB, PbN, PbR,
 		}
 		assert.Equal(t, want, got)
 	})
@@ -31,15 +31,15 @@ func Test_FenParsePiecesStr(t *testing.T) {
 
 		assert.Nil(t, err)
 
-		want := [64]piece{
+		want := [64]Piece{
 			00, 00, 00, 00, 00, 00, 00, 00,
-			00, 00, 00, 00, 00, 00, 00, bP,
-			00, 00, 00, 00, 00, 00, bP, bP,
-			00, 00, 00, 00, 00, bP, bP, bP,
-			00, 00, 00, 00, bP, bP, bP, bP,
-			00, 00, 00, bP, bP, bP, bP, bP,
-			00, 00, bP, bP, bP, bP, bP, bP,
-			00, bP, bP, bP, bP, bP, bP, bP,
+			00, 00, 00, 00, 00, 00, 00, PbP,
+			00, 00, 00, 00, 00, 00, PbP, PbP,
+			00, 00, 00, 00, 00, PbP, PbP, PbP,
+			00, 00, 00, 00, PbP, PbP, PbP, PbP,
+			00, 00, 00, PbP, PbP, PbP, PbP, PbP,
+			00, 00, PbP, PbP, PbP, PbP, PbP, PbP,
+			00, PbP, PbP, PbP, PbP, PbP, PbP, PbP,
 		}
 		assert.Equal(t, want, got)
 	})
@@ -83,14 +83,14 @@ func Test_FromFen(t *testing.T) {
 		want := &board120{
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-			-1, wR, wN, wB, wQ, wK, wB, wN, wR, -1,
-			-1, wP, wP, wP, wP, wP, wP, wP, wP, -1,
+			-1, PwR, PwN, PwB, PwQ, PwK, PwB, PwN, PwR, -1,
+			-1, PwP, PwP, PwP, PwP, PwP, PwP, PwP, PwP, -1,
 			-1, 00, 00, 00, 00, 00, 00, 00, 00, -1,
 			-1, 00, 00, 00, 00, 00, 00, 00, 00, -1,
 			-1, 00, 00, 00, 00, 00, 00, 00, 00, -1,
 			-1, 00, 00, 00, 00, 00, 00, 00, 00, -1,
-			-1, bP, bP, bP, bP, bP, bP, bP, bP, -1,
-			-1, bR, bN, bB, bQ, bK, bB, bN, bR, -1,
+			-1, PbP, PbP, PbP, PbP, PbP, PbP, PbP, PbP, -1,
+			-1, PbR, PbN, PbB, PbQ, PbK, PbB, PbN, PbR, -1,
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		}

@@ -23,7 +23,7 @@ non-contiguous range of 21-98.
 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 */
-type board120 [120]piece
+type board120 [120]Piece
 
 // bitboard64 is a representation of just an 8x8
 type bitboard64 struct {

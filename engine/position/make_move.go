@@ -10,13 +10,13 @@ Making a move...
 1. make move
 2. get the from, to, cap from the move
 3. store the current position in the p.history array
-4. move the current piece from -> to
-5. if a capture was made, remove it from the piece list
+4. move the current Piece from -> to
+5. if a capture was made, remove it from the Piece list
 6. update 50 move rule based on pawn move
 7. promotions
 8. enPas captures
 9. set enPas square if needed
-10. for all pieces added, moved, removed, etc update position counters + piece lists
+10. for all pieces added, moved, removed, etc update position counters + Piece lists
 11. maintain hashkey
 12. castle permissions
 13. change side, increment ply + hisPly
@@ -35,7 +35,7 @@ func (p *Position) clearPiece(sq int) {
 
 	// todo - remove
 	if pce == EMPTY {
-		panic(fmt.Sprintf("tried to clean an empty piece on sq %d", sq))
+		panic(fmt.Sprintf("tried to clean an empty Piece on sq %d", sq))
 	}
 
 	// set square, subtract value
@@ -69,11 +69,11 @@ func (p *Position) clearPiece(sq int) {
 	p.pieceList[pce][foundPieceIndex] = p.pieceList[pce][p.pieceCount[pce]-1]
 	// delete the last index, since we copied it forward
 	p.pieceList[pce][p.pieceCount[pce]-1] = 0
-	// decrement the total piece Count to match
+	// decrement the total Piece Count to match
 	p.pieceCount[pce]--
 }
 
-func (p *Position) addPiece(sq int, pce piece) {
+func (p *Position) addPiece(sq int, pce Piece) {
 
 	pceMeta := pieceLookups[pce]
 
@@ -130,14 +130,14 @@ func (p *Position) movePiece(from, to int) {
 	// todo - eliminate after perft
 	if !found {
 		fmt.Println("woops!")
-		// something setting p.pieceList[bP][1] to 0
-		panic("didnt find existing piece")
+		// something setting p.pieceList[PbP][1] to 0
+		panic("didnt find existing Piece")
 	}
 }
 
 // MakeMove updates the position for a newly made
 // move. It returns false if a king is left in check.
-func (p *Position) MakeMove(move movekey) bool {
+func (p *Position) MakeMove(move Movekey) bool {
 	err := p.AssertCache()
 	if err != nil {
 		panic(err)
@@ -152,7 +152,7 @@ func (p *Position) MakeMove(move movekey) bool {
 
 	p.history[p.hisPly].posKey = p.posKey
 
-	// enPas need to remove an additional piece
+	// enPas need to remove an additional Piece
 	if move.isEnPas() {
 		if side == WHITE {
 			p.clearPiece(to - 10)
@@ -226,11 +226,11 @@ func (p *Position) MakeMove(move movekey) bool {
 	p.searchPly++
 
 	// If it was a pawn move, reset to 0
-	if pce == wP || pce == bP {
+	if pce == PwP || pce == PbP {
 		p.fiftyMove = 0
 	}
 
-	// capture piece
+	// capture Piece
 	if captured != EMPTY {
 		p.clearPiece(to)
 		p.fiftyMove = 0
@@ -249,7 +249,7 @@ func (p *Position) MakeMove(move movekey) bool {
 		}
 	}
 
-	// move piece very last, after clearing capture
+	// move Piece very last, after clearing capture
 	p.movePiece(from, to)
 
 	// promoted
@@ -259,7 +259,7 @@ func (p *Position) MakeMove(move movekey) bool {
 	}
 
 	// update any king move
-	if pce == wK || pce == bK {
+	if pce == PwK || pce == PbK {
 		p.kingSq[p.side] = to
 	}
 
@@ -311,12 +311,12 @@ func (p *Position) UndoMove() {
 	// switch sides
 	p.side ^= 1
 
-	// enPas need to remove an additional piece
+	// enPas need to remove an additional Piece
 	if move.isEnPas() {
 		if p.side == WHITE {
-			p.addPiece(to-10, bP)
+			p.addPiece(to-10, PbP)
 		} else {
-			p.addPiece(to+10, wP)
+			p.addPiece(to+10, PwP)
 		}
 	}
 
@@ -340,9 +340,9 @@ func (p *Position) UndoMove() {
 	if move.getPromoted() != EMPTY {
 		p.clearPiece(to)
 		if pieceLookups[move.getPromoted()].color == WHITE {
-			p.addPiece(to, wP)
+			p.addPiece(to, PwP)
 		} else {
-			p.addPiece(to, bP)
+			p.addPiece(to, PbP)
 		}
 	}
 
@@ -350,7 +350,7 @@ func (p *Position) UndoMove() {
 
 	// restore king lookup if needed
 	pce := p.pieces[from]
-	if pce == wK || pce == bK {
+	if pce == PwK || pce == PbK {
 		p.kingSq[p.side] = from
 	}
 

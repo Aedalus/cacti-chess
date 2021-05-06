@@ -7,7 +7,7 @@ import (
 )
 
 type undo struct {
-	move       movekey
+	move       Movekey
 	castlePerm castlePerm
 	enPas      int
 	fiftyMove  int
@@ -20,8 +20,8 @@ type Position struct {
 
 	pawns [3]*bitboard64 // white/black/both quick pawn lookups
 
-	// piece list for fast lookup
-	// pieceList[wN][0] = E1 etc
+	// Piece list for fast lookup
+	// pieceList[PwN][0] = E1 etc
 	pieceList [13][10]int
 
 	kingSq [2]int // king quick lookups
@@ -32,7 +32,7 @@ type Position struct {
 
 	fiftyMove int // 50 move counter (100 since we're using half Moves)
 
-	searchPly uint // how far we are in the search
+	searchPly int // how far we are in the search
 
 	posKey uint64 // unique index for position
 
@@ -47,11 +47,31 @@ type Position struct {
 	history *[2048]undo
 }
 
+func (p *Position) GetPosKey() uint64 {
+	return p.posKey
+}
+
+func (p *Position) GetSearchPly() int {
+	return p.searchPly
+}
+
+func (p *Position) GetMaterial() [2]int {
+	return p.materialCount
+}
+
+func (p *Position) GetPieceCount() [13]int {
+	return p.pieceCount
+}
+
+func (p *Position) GetPieceList() [13][10]int {
+	return p.pieceList
+}
+
 // GenPosKey generates a statistically unique uint64
 // Key for the current state of the engine
 func (p Position) GenPosKey() uint64 {
 	var finalKey uint64 = 0
-	var pce piece = piece(0)
+	var pce Piece = Piece(0)
 
 	// pieces
 	for sq := 0; sq < BOARD_SQ_NUMBER; sq++ {
@@ -96,26 +116,26 @@ func (p *Position) updateListCaches() {
 
 			// update the pieceList, then increment the counter
 			// conceptually like
-			// [wP][0] = A2
-			// [wP][1] = B2 etc
+			// [PwP][0] = A2
+			// [PwP][1] = B2 etc
 			curPieceCount := p.pieceCount[pce]
 			p.pieceList[pce][curPieceCount] = i
 			p.pieceCount[pce]++
 
 			// update king positions
-			if pce == wK {
+			if pce == PwK {
 				p.kingSq[WHITE] = i
 			}
-			if pce == bK {
+			if pce == PbK {
 				p.kingSq[BLACK] = i
 			}
 
 			// update pawn boards
-			if pce == wP {
+			if pce == PwP {
 				p.pawns[WHITE].set(SQ64(i))
 				p.pawns[BOTH].set(SQ64(i))
 			}
-			if pce == bP {
+			if pce == PbP {
 				p.pawns[BLACK].set(SQ64(i))
 				p.pawns[BOTH].set(SQ64(i))
 			}
@@ -143,8 +163,8 @@ func (p *Position) AssertCache() error {
 		&bitboard64{},
 	}
 
-	// check piece lists
-	for pce := wP; pce <= bK; pce++ {
+	// check Piece lists
+	for pce := PwP; pce <= PbK; pce++ {
 		for i := 0; i < p.pieceCount[pce]; i++ {
 			sq := p.pieceList[pce][i]
 			if sq == 0 {
@@ -178,26 +198,26 @@ func (p *Position) AssertCache() error {
 
 			// update the pieceList, then increment the counter
 			// conceptually like
-			// [wP][0] = A2
-			// [wP][1] = B2 etc
+			// [PwP][0] = A2
+			// [PwP][1] = B2 etc
 			curPieceCount := t_pieceCount[pce]
 			t_pieceList[pce][curPieceCount] = i
 			t_pieceCount[pce]++
 
 			// update king positions
-			if pce == wK {
+			if pce == PwK {
 				t_kingSq[WHITE] = i
 			}
-			if pce == bK {
+			if pce == PbK {
 				t_kingSq[BLACK] = i
 			}
 
 			// update pawn boards
-			if pce == wP {
+			if pce == PwP {
 				t_pawns[WHITE].set(SQ64(i))
 				t_pawns[BOTH].set(SQ64(i))
 			}
-			if pce == bP {
+			if pce == PbP {
 				t_pawns[BLACK].set(SQ64(i))
 				t_pawns[BOTH].set(SQ64(i))
 			}
@@ -234,7 +254,7 @@ func (p *Position) AssertCache() error {
 
 // Reset will re-initialize the engine to an empty state
 func (p *Position) Reset() {
-	// initialize piece array
+	// initialize Piece array
 	p.pieces = &board120{}
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
 		p.pieces[i] = NO_SQ
@@ -246,7 +266,7 @@ func (p *Position) Reset() {
 	// castle perms
 	p.castlePerm = &castlePerm{CASTLE_PERMS_NONE}
 
-	// piece counts
+	// Piece counts
 	for i := 0; i < 13; i++ {
 		p.pieceCount[i] = 0
 	}
@@ -290,11 +310,11 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 
 	// pawns
 	if attackingColor == WHITE {
-		if p.pieces[sq-11] == wP || p.pieces[sq-9] == wP {
+		if p.pieces[sq-11] == PwP || p.pieces[sq-9] == PwP {
 			return true
 		}
 	} else {
-		if p.pieces[sq+11] == bP || p.pieces[sq+9] == bP {
+		if p.pieces[sq+11] == PbP || p.pieces[sq+9] == PbP {
 			return true
 		}
 	}
@@ -302,9 +322,9 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	// knights
 	for _, n := range dirKnight { // has the offsets for the knight jumps
 		kSq := sq + n
-		if attackingColor == WHITE && p.pieces[kSq] == wN {
+		if attackingColor == WHITE && p.pieces[kSq] == PwN {
 			return true
-		} else if attackingColor == BLACK && p.pieces[kSq] == bN {
+		} else if attackingColor == BLACK && p.pieces[kSq] == PbN {
 			return true
 		}
 	}
@@ -346,10 +366,10 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	for _, dir := range dirKing {
 		tsq := sq + dir
 		p := p.pieces[tsq]
-		if p == wK && attackingColor == WHITE {
+		if p == PwK && attackingColor == WHITE {
 			return true
 		}
-		if p == bK && attackingColor == BLACK {
+		if p == PbK && attackingColor == BLACK {
 			return true
 		}
 	}

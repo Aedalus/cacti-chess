@@ -6,7 +6,7 @@ import (
 )
 
 type Movescore struct {
-	Key   movekey
+	Key   Movekey
 	Score int
 }
 
@@ -29,60 +29,60 @@ func (list *Movelist) String() string {
 }
 
 // todo - clean these up?
-func (list *Movelist) addQuietMove(move movekey) {
+func (list *Movelist) addQuietMove(move Movekey) {
 	*list = append(*list, &Movescore{move, 0})
 }
 
-func (list *Movelist) addCaptureMove(move movekey) {
+func (list *Movelist) addCaptureMove(move Movekey) {
 	*list = append(*list, &Movescore{move, 0})
 }
 
-func (list *Movelist) addEnPasMove(move movekey) {
+func (list *Movelist) addEnPasMove(move Movekey) {
 	*list = append(*list, &Movescore{move, 0})
 }
 
-func (list *Movelist) addWhitePawnCaptureMove(from, to int, captured piece) {
+func (list *Movelist) addWhitePawnCaptureMove(from, to int, captured Piece) {
 	if rankLookups[from] == RANK_7 {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(wQ))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(wR))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(wB))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(wN))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PwQ))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PwR))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PwB))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PwN))
 	} else {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured))
 
 	}
 }
 
 func (list *Movelist) addWhitePawnMove(from, to int) {
 	if rankLookups[from] == RANK_7 {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(wQ))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(wR))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(wB))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(wN))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PwQ))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PwR))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PwB))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PwN))
 	} else {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to))
 	}
 }
 
-func (list *Movelist) addBlackPawnCaptureMove(from, to int, captured piece) {
+func (list *Movelist) addBlackPawnCaptureMove(from, to int, captured Piece) {
 	if rankLookups[from] == RANK_2 {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(bQ))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(bR))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(bB))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(bN))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PbQ))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PbR))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PbB))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured).setPromoted(PbN))
 	} else {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setCaptured(captured))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setCaptured(captured))
 	}
 }
 
 func (list *Movelist) addBlackPawnMove(from, to int) {
 	if rankLookups[from] == RANK_2 {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(bQ))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(bR))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(bB))
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to).setPromoted(bN))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PbQ))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PbR))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PbB))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to).setPromoted(PbN))
 	} else {
-		list.addCaptureMove(movekey(0).setFrom(from).setTo(to))
+		list.addCaptureMove(Movekey(0).setFrom(from).setTo(to))
 	}
 }
 
@@ -102,7 +102,7 @@ func (p *Position) GenerateAllMoves() *Movelist {
 			if p.pieces[F1] == EMPTY && p.pieces[G1] == EMPTY {
 				if !p.IsSquareAttacked(E1, BLACK) && !p.IsSquareAttacked(F1, BLACK) && !p.IsSquareAttacked(G1, BLACK) {
 					// add a new castle move
-					list.addQuietMove(movekey(0).setFrom(E1).setTo(G1).setCastle())
+					list.addQuietMove(Movekey(0).setFrom(E1).setTo(G1).setCastle())
 				}
 			}
 		}
@@ -111,7 +111,7 @@ func (p *Position) GenerateAllMoves() *Movelist {
 		if p.castlePerm.Has(CASTLE_PERMS_WQ) {
 			if p.pieces[D1] == EMPTY && p.pieces[C1] == EMPTY && p.pieces[B1] == EMPTY {
 				if !p.IsSquareAttacked(E1, BLACK) && !p.IsSquareAttacked(D1, BLACK) && !p.IsSquareAttacked(C1, BLACK) {
-					list.addQuietMove(movekey(0).setFrom(E1).setTo(C1).setCastle())
+					list.addQuietMove(Movekey(0).setFrom(E1).setTo(C1).setCastle())
 				}
 			}
 		}
@@ -122,7 +122,7 @@ func (p *Position) GenerateAllMoves() *Movelist {
 			if p.pieces[F8] == EMPTY && p.pieces[G8] == EMPTY {
 				if !p.IsSquareAttacked(E8, WHITE) && !p.IsSquareAttacked(F8, WHITE) && !p.IsSquareAttacked(G8, WHITE) {
 					// add a new castle move
-					list.addQuietMove(movekey(0).setFrom(E8).setTo(G8).setCastle())
+					list.addQuietMove(Movekey(0).setFrom(E8).setTo(G8).setCastle())
 				}
 			}
 		}
@@ -131,7 +131,7 @@ func (p *Position) GenerateAllMoves() *Movelist {
 		if p.castlePerm.Has(CASTLE_PERMS_BQ) {
 			if p.pieces[D8] == EMPTY && p.pieces[C8] == EMPTY && p.pieces[B8] == EMPTY {
 				if !p.IsSquareAttacked(E8, WHITE) && !p.IsSquareAttacked(D8, WHITE) && !p.IsSquareAttacked(C8, WHITE) {
-					list.addQuietMove(movekey(0).setFrom(E8).setTo(C8).setCastle())
+					list.addQuietMove(Movekey(0).setFrom(E8).setTo(C8).setCastle())
 				}
 			}
 		}
@@ -140,11 +140,11 @@ func (p *Position) GenerateAllMoves() *Movelist {
 	// pawns
 	if p.side == WHITE {
 		// iterate through each pawn
-		for i := 0; i < p.pieceCount[wP]; i++ {
-			sq := p.pieceList[wP][i]
+		for i := 0; i < p.pieceCount[PwP]; i++ {
+			sq := p.pieceList[PwP][i]
 			// todo - comment out to speed up
 			if sqOffBoard(sq) {
-				panic(fmt.Errorf("wP position off board: %v", sq))
+				panic(fmt.Errorf("PwP position off board: %v", sq))
 			}
 
 			// check pawn movements
@@ -153,7 +153,7 @@ func (p *Position) GenerateAllMoves() *Movelist {
 
 				// check for RANK_2 double move
 				if rankLookups[sq] == RANK_2 && p.pieces[sq+20] == EMPTY {
-					list.addQuietMove(movekey(0).setFrom(sq).setTo(sq + 20).setPawnStart())
+					list.addQuietMove(Movekey(0).setFrom(sq).setTo(sq + 20).setPawnStart())
 				}
 			}
 
@@ -169,19 +169,19 @@ func (p *Position) GenerateAllMoves() *Movelist {
 
 			// enPas captures
 			if lSq == p.enPas {
-				list.addCaptureMove(movekey(0).setFrom(sq).setTo(lSq).setEnPas())
+				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(lSq).setEnPas())
 			}
 			if rSq == p.enPas {
-				list.addCaptureMove(movekey(0).setFrom(sq).setTo(rSq).setEnPas())
+				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(rSq).setEnPas())
 			}
 		}
 	} else { // black side
 		// iterate through each pawn
-		for i := 0; i < p.pieceCount[bP]; i++ {
-			sq := p.pieceList[bP][i]
+		for i := 0; i < p.pieceCount[PbP]; i++ {
+			sq := p.pieceList[PbP][i]
 			// todo - comment out to speed up
 			if sqOffBoard(sq) {
-				panic(fmt.Errorf("bP position off board: %v", sq))
+				panic(fmt.Errorf("PbP position off board: %v", sq))
 			}
 
 			// check pawn movements
@@ -190,7 +190,7 @@ func (p *Position) GenerateAllMoves() *Movelist {
 
 				// check for RANK_2 double move
 				if rankLookups[sq] == RANK_7 && p.pieces[sq-20] == EMPTY {
-					list.addQuietMove(movekey(0).setFrom(sq).setTo(sq - 20).setPawnStart())
+					list.addQuietMove(Movekey(0).setFrom(sq).setTo(sq - 20).setPawnStart())
 				}
 			}
 
@@ -206,23 +206,23 @@ func (p *Position) GenerateAllMoves() *Movelist {
 
 			// enPas captures
 			if lSq == p.enPas {
-				list.addCaptureMove(movekey(0).setFrom(sq).setTo(lSq).setEnPas())
+				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(lSq).setEnPas())
 			}
 			if rSq == p.enPas {
-				list.addCaptureMove(movekey(0).setFrom(sq).setTo(rSq).setEnPas())
+				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(rSq).setEnPas())
 			}
 		}
 	}
 
 	// set up all pieces per color
-	var nonslidingPieces [2]piece
-	var slidingPieces [3]piece
+	var nonslidingPieces [2]Piece
+	var slidingPieces [3]Piece
 	if p.side == WHITE {
-		nonslidingPieces = [2]piece{wN, wK}
-		slidingPieces = [3]piece{wB, wR, wQ}
+		nonslidingPieces = [2]Piece{PwN, PwK}
+		slidingPieces = [3]Piece{PwB, PwR, PwQ}
 	} else {
-		nonslidingPieces = [2]piece{bN, bK}
-		slidingPieces = [3]piece{bB, bR, bQ}
+		nonslidingPieces = [2]Piece{PbN, PbK}
+		slidingPieces = [3]Piece{PbB, PbR, PbQ}
 	}
 
 	// knights/kings
@@ -236,9 +236,9 @@ func (p *Position) GenerateAllMoves() *Movelist {
 					continue
 				}
 				if p.pieces[toSq] == EMPTY {
-					list.addQuietMove(movekey(0).setFrom(fromSq).setTo(toSq))
+					list.addQuietMove(Movekey(0).setFrom(fromSq).setTo(toSq))
 				} else if pieceLookups[p.pieces[toSq]].color != p.side {
-					list.addCaptureMove(movekey(0).setFrom(fromSq).setTo(toSq).setCaptured(p.pieces[toSq]))
+					list.addCaptureMove(Movekey(0).setFrom(fromSq).setTo(toSq).setCaptured(p.pieces[toSq]))
 				}
 			}
 		}
@@ -254,10 +254,10 @@ func (p *Position) GenerateAllMoves() *Movelist {
 				toPce := p.pieces[toSq]
 				for toPce != NO_SQ {
 					if toPce == EMPTY {
-						list.addQuietMove(movekey(0).setFrom(fromSq).setTo(toSq))
+						list.addQuietMove(Movekey(0).setFrom(fromSq).setTo(toSq))
 					} else {
 						if pieceLookups[toPce].color != p.side {
-							list.addCaptureMove(movekey(0).setFrom(fromSq).setTo(toSq).setCaptured(toPce))
+							list.addCaptureMove(Movekey(0).setFrom(fromSq).setTo(toSq).setCaptured(toPce))
 						}
 						break // go to next direction
 					}

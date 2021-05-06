@@ -125,10 +125,10 @@ func parseCastlePerms(permStr string) *castlePerm {
 
 // parsePieceStr returns a len 64 array, with the start being
 // A1, B1, etc, opposed to the fen string which starts with A8.
-func parsePiecesStr(pieces string) ([64]piece, error) {
+func parsePiecesStr(pieces string) ([64]Piece, error) {
 	rankStrings := strings.Split(pieces, "/")
 	if len(rankStrings) != 8 {
-		return [64]piece{}, fmt.Errorf("pieceStr should have 8 parts total")
+		return [64]Piece{}, fmt.Errorf("pieceStr should have 8 parts total")
 	}
 
 	// reverse the rankStrings so we start with 1st rank, not 8th
@@ -137,45 +137,45 @@ func parsePiecesStr(pieces string) ([64]piece, error) {
 		rankStrings[i], rankStrings[j] = rankStrings[j], rankStrings[i]
 	}
 
-	board := [64]piece{}
+	board := [64]Piece{}
 
 	for rankPos := 7; rankPos >= 0; rankPos-- {
 		filePos := 0
 		rankStr := rankStrings[rankPos]
 		for _, c := range rankStr {
-			var pieceType piece
+			var pieceType Piece
 
 			// switch off of character
 			switch c {
 			case 'p':
-				pieceType = bP
+				pieceType = PbP
 			case 'r':
-				pieceType = bR
+				pieceType = PbR
 			case 'n':
-				pieceType = bN
+				pieceType = PbN
 			case 'b':
-				pieceType = bB
+				pieceType = PbB
 			case 'k':
-				pieceType = bK
+				pieceType = PbK
 			case 'q':
-				pieceType = bQ
+				pieceType = PbQ
 			case 'P':
-				pieceType = wP
+				pieceType = PwP
 			case 'R':
-				pieceType = wR
+				pieceType = PwR
 			case 'N':
-				pieceType = wN
+				pieceType = PwN
 			case 'B':
-				pieceType = wB
+				pieceType = PwB
 			case 'K':
-				pieceType = wK
+				pieceType = PwK
 			case 'Q':
-				pieceType = wQ
+				pieceType = PwQ
 			case '1', '2', '3', '4', '5', '6', '7', '8':
 				pieceType = EMPTY
 				emptySpaces, err := strconv.Atoi(string(c))
 				if err != nil {
-					return [64]piece{}, err
+					return [64]Piece{}, err
 				}
 				filePos += emptySpaces
 			}
