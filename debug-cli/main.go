@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"cacti-chess/engine/position"
+	"cacti-chess/engine/search"
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -58,6 +59,11 @@ func main() {
 							if mvStr == "quit" || mvStr == "exit" {
 								fmt.Println("exiting...")
 								os.Exit(0)
+							}
+
+							if mvStr == "search" {
+								fmt.Println("searching")
+								s := search.New()
 							}
 
 							// parse the given move

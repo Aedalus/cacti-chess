@@ -67,6 +67,14 @@ func (p *Position) GetPieceList() [13][10]int {
 	return p.pieceList
 }
 
+func (p *Position) GetFiftyMove() int {
+	return p.fiftyMove
+}
+
+func (p *Position) GetSide() int {
+	return p.side
+}
+
 // GenPosKey generates a statistically unique uint64
 // Key for the current state of the engine
 func (p Position) GenPosKey() uint64 {
@@ -378,6 +386,10 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	return false
 }
 
+func (p *Position) IsKingAttacked() bool {
+	return p.IsSquareAttacked(p.kingSq[p.side], p.side^1)
+}
+
 func (p Position) String() string {
 	output := strings.Builder{}
 	output.WriteString(p.PrintBoard())
@@ -421,14 +433,11 @@ func (p Position) PrintAttackBoard(attackingSide int) string {
 	return output.String()
 }
 
-func (p *Position) getRepetition() int {
-	count := 0
-
+func (p *Position) IsRepetition() bool {
 	for _, his := range p.history {
 		if his.posKey == p.posKey {
-			count++
+			return true
 		}
 	}
-
-	return count
+	return false
 }

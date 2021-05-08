@@ -17,20 +17,24 @@ func (tb *PrincipalVariationTable) Probe(p *position.Position) position.Movekey 
 	return (*tb)[p.GetPosKey()]
 }
 
-func (tb PrincipalVariationTable) GetPVLine(depth int, p *position.Position) {
+func (tb PrincipalVariationTable) GetPVLine(p *position.Position) []position.Movekey {
+	var moves []position.Movekey
+
 	move := tb[p.GetPosKey()]
 
 	for move != position.Movekey(0) {
 		if p.MoveExists(move) {
+			moves = append(moves, move)
 			p.MakeMove(move)
+			move = tb[p.GetPosKey()]
 		} else {
-			break
+			panic("move does not exist!")
 		}
-
-		move = tb[p.GetPosKey()]
 	}
 
-	for p.GetSearchPly() > 0 {
+	for i := 0; i < len(moves); i++ {
 		p.UndoMove()
 	}
+
+	return moves
 }
