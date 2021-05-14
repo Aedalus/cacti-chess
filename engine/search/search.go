@@ -5,7 +5,6 @@ import (
 	"cacti-chess/engine/position"
 	"fmt"
 	"math"
-	"strings"
 	"time"
 )
 
@@ -74,6 +73,10 @@ func (s *SearchInfo) Clear() {
 	s.fhf = 0
 }
 
+func (s *SearchInfo) GetPrincipalVariationLine(p *position.Position) []position.Movekey {
+	return s.pvTable.GetPVLine(p)
+}
+
 func (s *SearchInfo) CheckUp() {
 	// checks if it needs to report back
 }
@@ -134,9 +137,15 @@ Notice that this means the scoring function must always return the value relativ
 
 
 // ALPHA BETA PRUNING
+Alpha and Beta also take on relative values. So alpha is always equal to the best known score for the
+current player. Beta is the best known for the opponent. If we are currently looking at
 
-alpha = best known score for depth 0 side
-beta = best known score for depth 0 opponent
+alpha = 20, beta = -10
+
+and do a hypothetically neutral move, when we call the recursive function again we need to flip the values
+and negate them, so the next iteration shows
+
+alpha = 10, beta = -20
 */
 
 func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth int, doNull bool) float64 {
@@ -159,8 +168,8 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 
 	// move loop
 	mlist := p.GenerateAllMoves()
-	mlistStr := mlist.String()
-	fmt.Sprintf(mlistStr)
+	//mlistStr := mlist.String()
+	//fmt.Sprintf(mlistStr)
 
 	legal := 0
 	oldAlpha := alpha
@@ -172,8 +181,8 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 			continue
 		}
 
-		shrtMv := mv.Key.ShortString()
-		tabs := strings.Repeat(" ", 10-depth)
+		//shrtMv := mv.Key.ShortString()
+		//tabs := strings.Repeat(" ", 10-depth)
 		// increment the number of legal moves we've found
 		legal++
 
@@ -183,7 +192,7 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 		score := -s.AlphaBeta(p, -beta, -alpha, depth-1, true)
 		p.UndoMove()
 
-		fmt.Printf("%s ab %d mv: %v score: %v\n", tabs, depth, shrtMv, score)
+		//fmt.Printf("%s ab %d mv: %v score: %v\n", tabs, depth, shrtMv, score)
 
 		if score > alpha {
 			if score >= beta {
