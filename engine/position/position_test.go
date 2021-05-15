@@ -98,7 +98,7 @@ func TestPosition_Reset(t *testing.T) {
 		minPieceCount: [2]int{},
 		materialCount: [2]int{},
 		hisPly:        0,
-		history:       &[2048]undo{},
+		history:       []undo{},
 	}
 	sample := &Position{
 		pieces:        &board120{},
@@ -117,7 +117,7 @@ func TestPosition_Reset(t *testing.T) {
 		minPieceCount: [2]int{1, 1},
 		materialCount: [2]int{1, 1},
 		hisPly:        70,
-		history:       &[2048]undo{},
+		history:       []undo{},
 	}
 	sample.Reset()
 	assert.Equal(t, sample, want)

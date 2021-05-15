@@ -58,6 +58,12 @@ var playCmd = &cli.Command{
 						os.Exit(0)
 					}
 
+					if mvStr == "undo" {
+						p.UndoMove()
+						p.UndoMove()
+						break
+					}
+
 					// parse the given move
 					movekey, err := p.ParseMove(mvStr)
 					if err != nil || movekey.IsNoMove() {
@@ -70,9 +76,8 @@ var playCmd = &cli.Command{
 				}
 			} else {
 				search := search.New()
-				search.AlphaBeta(p, math.Inf(-1), math.Inf(1), 3, false)
+				search.AlphaBeta(p, math.Inf(-1), math.Inf(1), 5, false)
 				line := search.GetPrincipalVariationLine(p)
-				fmt.Printf("computer move: %v\n", line[0].ShortString())
 				p.MakeMove(line[0])
 				playerTurn = !playerTurn
 			}

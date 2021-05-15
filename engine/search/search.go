@@ -77,6 +77,10 @@ func (s *SearchInfo) GetPrincipalVariationLine(p *position.Position) []position.
 	return s.pvTable.GetPVLine(p)
 }
 
+func (s *SearchInfo) GetPrincipalVariationTable() *PrincipalVariationTable {
+	return s.pvTable
+}
+
 func (s *SearchInfo) CheckUp() {
 	// checks if it needs to report back
 }

@@ -150,7 +150,14 @@ func (p *Position) MakeMove(move Movekey) bool {
 	promoted := move.getPromoted()
 	pce := p.pieces[from]
 
-	p.history[p.hisPly].posKey = p.posKey
+	p.hisPly++
+	p.history = append(p.history, undo{
+		posKey:     p.posKey,
+		move:       move,
+		fiftyMove:  p.fiftyMove,
+		enPas:      p.enPas,
+		castlePerm: *p.castlePerm,
+	})
 
 	// enPas need to remove an additional Piece
 	if move.isEnPas() {
@@ -182,10 +189,10 @@ func (p *Position) MakeMove(move Movekey) bool {
 
 	// hash enPas?
 
-	p.history[p.hisPly].move = move
-	p.history[p.hisPly].fiftyMove = p.fiftyMove
-	p.history[p.hisPly].enPas = p.enPas
-	p.history[p.hisPly].castlePerm = *p.castlePerm
+	//p.history[p.hisPly].move = move
+	//p.history[p.hisPly].fiftyMove = p.fiftyMove
+	//p.history[p.hisPly].enPas = p.enPas
+	//p.history[p.hisPly].castlePerm = *p.castlePerm
 
 	// hash castle out?
 
@@ -220,9 +227,7 @@ func (p *Position) MakeMove(move Movekey) bool {
 
 	// hash castle?
 
-	// update history in general
 	p.fiftyMove++
-	p.hisPly++
 	p.searchPly++
 
 	// If it was a pawn move, reset to 0
@@ -298,7 +303,8 @@ func (p *Position) UndoMove() {
 	p.hisPly--
 	p.searchPly--
 
-	u := p.history[p.hisPly]
+	u := p.history[len(p.history)-1]
+	p.history = p.history[:len(p.history)-1]
 	move := u.move
 	from := move.getFrom()
 	to := move.getTo()

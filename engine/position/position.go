@@ -44,7 +44,7 @@ type Position struct {
 
 	// history
 	hisPly  int // how many half Moves have been made in the whole game
-	history *[2048]undo
+	history []undo
 }
 
 func (p *Position) GetPosKey() uint64 {
@@ -298,7 +298,7 @@ func (p *Position) Reset() {
 	p.fiftyMove = 0
 	p.searchPly = 0
 	p.hisPly = 0
-	p.history = &[2048]undo{}
+	p.history = []undo{}
 	p.posKey = 0
 }
 

@@ -83,4 +83,34 @@ func TestSearchInfo_SearchPosition(t *testing.T) {
 		}
 		assert.Equal(t, []string{"f3f7", "e8f7", "g4h5"}, names)
 	})
+
+	t.Run("crash-1", func(t *testing.T) {
+		//p, err := position.FromFen("rnbqk2r/ppp2pQp/8/3pP3/4n3/2P5/PPP3PP/R1B1KBNR b KQkq - 0 7")
+		p, err := position.FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+		require.Nil(t, err)
+
+		moves := []string{
+			"e2e4", "g8f6",
+			"b1c3", "e7e5",
+			"f2f4", "f8b4",
+			"f4e5", "b4c3",
+			"d2c3", "f6e4",
+			"d1g4", "d7d5",
+			"g4g7",
+		}
+
+		for _, mv := range moves {
+			mv, err := p.ParseMove(mv)
+			if err != nil {
+				panic(err)
+			}
+			p.MakeMove(mv)
+
+			s := New()
+			s.AlphaBeta(p, math.Inf(-1), math.Inf(1), 3, false)
+			line := s.pvTable.GetPVLine(p)
+			assert.Len(t, line, 3)
+
+		}
+	})
 }
