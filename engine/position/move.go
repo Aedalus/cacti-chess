@@ -9,8 +9,6 @@ import (
 The Movekey condenses all the information
 about a player's move into 64 bits
 
-                 11 1100 0000 0000 0000
-               0100 0001 0110 1011 0110
 4 ------- 3 ------- 2 ------- 1 -------
 0000 0000 0000 0000 0000 0000 0xxx xxxx -> From
 0000 0000 0000 0000 00xx xxxx x000 0000 -> To

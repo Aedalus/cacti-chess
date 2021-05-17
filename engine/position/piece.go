@@ -1,8 +1,17 @@
 package position
 
+// Piece represents a type of chess piece, like white pawn,
+// black rook, etc. Note that a white pawn and black pawn
+// are two separate pieces.
+//
+// Constant shorthand:
+// - 1st Char - P to denote a piece
+// - 2nd Char - w/b for white/black
+// - 3rd Char - P/N/B/R/Q/K for type
 type Piece int8
 
 const PIECE_COUNT = 13
+
 const (
 	EMPTY Piece = iota
 	PwP
@@ -19,6 +28,10 @@ const (
 	PbK
 )
 
+// pieceMetadata provides common information
+// about each piece, like material value.
+// Some of this data could be derived, but allows for
+// faster computation when generating moves
 type pieceMetadata struct {
 	isBig           bool  // everything but pawns + empty
 	isMajor         bool  // rooks, queens, kings
@@ -31,7 +44,6 @@ type pieceMetadata struct {
 	dir             []int // movement directions
 }
 
-// used for fast lookups without calling functions
 var pieceLookups = map[Piece]pieceMetadata{
 	EMPTY: {
 		color: BOTH,

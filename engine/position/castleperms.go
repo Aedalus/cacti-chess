@@ -11,6 +11,8 @@ const (
 	CASTLE_PERMS_ALL  = 15
 )
 
+// castlePerm is a bitmask for the castle permissions
+// remaining on the board
 type castlePerm struct {
 	val int
 }

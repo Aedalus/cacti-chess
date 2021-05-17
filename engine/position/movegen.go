@@ -10,7 +10,6 @@ type Movescore struct {
 	Score int
 }
 
-// todo - turn this into a slice
 type Movelist []*Movescore
 
 func (list *Movelist) String() string {
@@ -28,7 +27,7 @@ func (list *Movelist) String() string {
 	return b.String()
 }
 
-// todo - clean these up?
+// todo - clean these up? Might use them to speed up search?
 func (list *Movelist) addQuietMove(move Movekey) {
 	*list = append(*list, &Movescore{move, 0})
 }
@@ -168,11 +167,13 @@ func (p *Position) GenerateAllMoves() *Movelist {
 			}
 
 			// enPas captures
-			if lSq == p.enPas {
-				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(lSq).setEnPas())
-			}
-			if rSq == p.enPas {
-				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(rSq).setEnPas())
+			if p.enPas != NO_SQ {
+				if lSq == p.enPas {
+					list.addCaptureMove(Movekey(0).setFrom(sq).setTo(lSq).setEnPas())
+				}
+				if rSq == p.enPas {
+					list.addCaptureMove(Movekey(0).setFrom(sq).setTo(rSq).setEnPas())
+				}
 			}
 		}
 	} else { // black side
@@ -205,11 +206,13 @@ func (p *Position) GenerateAllMoves() *Movelist {
 			}
 
 			// enPas captures
-			if lSq == p.enPas {
-				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(lSq).setEnPas())
-			}
-			if rSq == p.enPas {
-				list.addCaptureMove(Movekey(0).setFrom(sq).setTo(rSq).setEnPas())
+			if p.enPas != NO_SQ {
+				if lSq == p.enPas {
+					list.addCaptureMove(Movekey(0).setFrom(sq).setTo(lSq).setEnPas())
+				}
+				if rSq == p.enPas {
+					list.addCaptureMove(Movekey(0).setFrom(sq).setTo(rSq).setEnPas())
+				}
 			}
 		}
 	}

@@ -10,16 +10,16 @@ import (
 type testCaseScore struct {
 	name string
 	fen  string
-	want int
+	want float64
 }
 
 func (tc testCaseScore) assert(t *testing.T) {
 	t.Helper()
 
-	scr := PositionScorer{}
+	scr := PositionEvaluator{}
 	p, err := position.FromFen(tc.fen)
 	require.Nil(t, err)
-	score := scr.Score(p)
+	score := scr.EvaluateAbsolute(p)
 	assert.Equal(t, tc.want, score)
 }
 
@@ -29,6 +29,11 @@ func TestPositionScorer_Score(t *testing.T) {
 		{
 			"starting position",
 			"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+			0,
+		},
+		{
+			"starting position - black",
+			"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1",
 			0,
 		},
 		{

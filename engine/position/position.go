@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// undo tracks all data needed to revert the board to the previous state
 type undo struct {
 	move       Movekey
 	castlePerm castlePerm
@@ -14,6 +15,8 @@ type undo struct {
 	posKey     uint64
 }
 
+// Position is a given state of the board. The pieces field is the source of truth,
+// with other fields allowing for quick lookups via caching
 type Position struct {
 	pieces *board120 // Source of truth for pieces
 	side   int       // white/black
@@ -44,7 +47,7 @@ type Position struct {
 
 	// history
 	hisPly  int // how many half Moves have been made in the whole game
-	history *[2048]undo
+	history []undo
 }
 
 func (p *Position) GetPosKey() uint64 {
@@ -67,8 +70,16 @@ func (p *Position) GetPieceList() [13][10]int {
 	return p.pieceList
 }
 
+func (p *Position) GetFiftyMove() int {
+	return p.fiftyMove
+}
+
+func (p *Position) GetSide() int {
+	return p.side
+}
+
 // GenPosKey generates a statistically unique uint64
-// Key for the current state of the engine
+// for the current state of the position
 func (p Position) GenPosKey() uint64 {
 	var finalKey uint64 = 0
 	var pce Piece = Piece(0)
@@ -97,6 +108,7 @@ func (p Position) GenPosKey() uint64 {
 	return finalKey
 }
 
+// updateListCaches updates all piece caches based on pieces
 func (p *Position) updateListCaches() {
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
 		pce := p.pieces[i]
@@ -143,10 +155,14 @@ func (p *Position) updateListCaches() {
 	}
 }
 
-// will panic if the cache isn't right. used for debugging
+// AssertCache was used heavily during initial development,
+// but slows down computation by ~2x. It recalculates the cache
+// from scratch and asserts the existing cached values are as
+// they should be
 func (p *Position) AssertCache() error {
-	//todo - comment out
+	// Comment out if debugging
 	return nil
+
 	// temporary values we recompute to check against
 	t_pieceCount := [13]int{}
 	t_pieceList := [13][10]int{}
@@ -290,7 +306,7 @@ func (p *Position) Reset() {
 	p.fiftyMove = 0
 	p.searchPly = 0
 	p.hisPly = 0
-	p.history = &[2048]undo{}
+	p.history = []undo{}
 	p.posKey = 0
 }
 
@@ -378,6 +394,10 @@ func (p *Position) IsSquareAttacked(sq, attackingColor int) bool {
 	return false
 }
 
+func (p *Position) IsKingAttacked() bool {
+	return p.IsSquareAttacked(p.kingSq[p.side], p.side^1)
+}
+
 func (p Position) String() string {
 	output := strings.Builder{}
 	output.WriteString(p.PrintBoard())
@@ -421,14 +441,11 @@ func (p Position) PrintAttackBoard(attackingSide int) string {
 	return output.String()
 }
 
-func (p *Position) getRepetition() int {
-	count := 0
-
+func (p *Position) IsRepetition() bool {
 	for _, his := range p.history {
 		if his.posKey == p.posKey {
-			count++
+			return true
 		}
 	}
-
-	return count
+	return false
 }

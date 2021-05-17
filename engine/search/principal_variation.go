@@ -2,35 +2,42 @@ package search
 
 import "cacti-chess/engine/position"
 
-type PrincipalVariationEntry struct {
-	PosKey uint64
-	move   int
-}
-
+// PrincipalVariationTable can be used to reconstruct the best
+// line found from a position. As the AlphaBeta function evaluates,
+// it stores key/values for the poskey of a position with the best known
+// move. The "principal variation" is the best known line for a given position
 type PrincipalVariationTable map[uint64]position.Movekey
 
+// Set adds a new movekey, retrieving the poskey from the position
 func (tb *PrincipalVariationTable) Set(p *position.Position, mv position.Movekey) {
 	(*tb)[p.GetPosKey()] = mv
 }
 
+// Probe gets the movekey from a given position
 func (tb *PrincipalVariationTable) Probe(p *position.Position) position.Movekey {
 	return (*tb)[p.GetPosKey()]
 }
 
-func (tb PrincipalVariationTable) GetPVLine(depth int, p *position.Position) {
+// GetBestLine returns the best known line as a slice of movekeys. It will also
+// undo all the moves back to before the alpha/beta started.
+func (tb PrincipalVariationTable) GetBestLine(p *position.Position) []position.Movekey {
+	var moves []position.Movekey
+
 	move := tb[p.GetPosKey()]
 
 	for move != position.Movekey(0) {
 		if p.MoveExists(move) {
+			moves = append(moves, move)
 			p.MakeMove(move)
+			move = tb[p.GetPosKey()]
 		} else {
-			break
+			panic("move does not exist!")
 		}
-
-		move = tb[p.GetPosKey()]
 	}
 
-	for p.GetSearchPly() > 0 {
+	for i := 0; i < len(moves); i++ {
 		p.UndoMove()
 	}
+
+	return moves
 }
