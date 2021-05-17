@@ -6,7 +6,7 @@ import (
 )
 
 func TestPosition_MakeMove(t *testing.T) {
-	t.Run("crash-1", func(t *testing.T) {
+	t.Run("crash-0", func(t *testing.T) {
 		//p, err := position.FromFen("rnbqk2r/ppp2pQp/8/3pP3/4n3/2P5/PPP3PP/R1B1KBNR b KQkq - 0 7")
 		p, err := FromFen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
 		require.Nil(t, err)

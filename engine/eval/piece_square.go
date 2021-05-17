@@ -1,8 +1,12 @@
 package eval
 
+// Piece squares give a simple way to evaluate position for pieces.
+// For example, pieces are generally better towards the center,
+// pieces should get moved from start, etc.
+
 // These are all from white's perspective, so
 // index[0] == A1 etc. Flip them with the
-// mirror64 board
+// mirror64 board i.e. pawnTable[mirror64[0]]
 
 var (
 	pawnTable = [64]int{

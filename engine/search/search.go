@@ -26,8 +26,8 @@ type SearchInfo struct {
 	quit    bool // quit is set to true if forcefully exited
 	stopped bool // stopped is more graceful
 
-	fh  int
-	fhf int
+	fh  int // used to test alpha/beta efficiency
+	fhf int // used to test alpha/beta efficiency
 
 	// time controls
 	depthset  int // max depth
@@ -38,13 +38,14 @@ type SearchInfo struct {
 
 func New() *SearchInfo {
 	s := &SearchInfo{}
-	s.scorer = &eval.PositionScorer{}
+	s.scorer = &eval.PositionEvaluator{}
 	s.Clear()
 	return s
 }
 
 type Scorer interface {
-	Score(p *position.Position) float64
+	Evaluate(p *position.Position) float64
+	EvaluateAbsolute(p *position.Position) float64
 }
 
 // Clear resets the search
@@ -74,19 +75,11 @@ func (s *SearchInfo) Clear() {
 }
 
 func (s *SearchInfo) GetPrincipalVariationLine(p *position.Position) []position.Movekey {
-	return s.pvTable.GetPVLine(p)
+	return s.pvTable.GetBestLine(p)
 }
 
 func (s *SearchInfo) GetPrincipalVariationTable() *PrincipalVariationTable {
 	return s.pvTable
-}
-
-func (s *SearchInfo) CheckUp() {
-	// checks if it needs to report back
-}
-
-func (s *SearchInfo) Quiescence(p *position.Position, alpha, beta int) int {
-	return 0
 }
 
 /*
@@ -157,7 +150,7 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 	// base case it's a leaf node, we return the evaluation relative to the current player.
 	if depth == 0 {
 		s.nodes++
-		return s.scorer.Score(p)
+		return s.scorer.EvaluateAbsolute(p)
 	}
 
 	// edge cases for repetition, or if we are too far down return 0 for a draw
@@ -167,27 +160,21 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 
 	// endgame scenario, few pieces so we're searching a lot of depth
 	if s.searchPly > maxDepth {
-		return s.scorer.Score(p)
+		return s.scorer.EvaluateAbsolute(p)
 	}
 
-	// move loop
-	mlist := p.GenerateAllMoves()
-	//mlistStr := mlist.String()
-	//fmt.Sprintf(mlistStr)
+	movelist := p.GenerateAllMoves()
 
 	legal := 0
 	oldAlpha := alpha
 	bestMove := position.Movekey(0)
 
-	for _, mv := range *mlist {
+	for _, mv := range *movelist {
 		// if it's not legal, auto undo
 		if !p.MakeMove(mv.Key) {
 			continue
 		}
 
-		//shrtMv := mv.Key.ShortString()
-		//tabs := strings.Repeat(" ", 10-depth)
-		// increment the number of legal moves we've found
 		legal++
 
 		// We call alphaBeta again to find the best response from our opponent
@@ -196,8 +183,7 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 		score := -s.AlphaBeta(p, -beta, -alpha, depth-1, true)
 		p.UndoMove()
 
-		//fmt.Printf("%s ab %d mv: %v score: %v\n", tabs, depth, shrtMv, score)
-
+		// evaluate if this is better than what we've seen
 		if score > alpha {
 			if score >= beta {
 				if legal == 1 {
@@ -211,7 +197,7 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 		}
 	}
 
-	// check for stalemate
+	// check for stalemate/checkmate
 	if legal == 0 {
 		// if we're mated, return the low mate score with the depth to mate
 		// added. i.e. mate in 2 is -28998, 3 -28997
@@ -239,13 +225,10 @@ func (s *SearchInfo) SearchPosition(p *position.Position) {
 
 	// todo - cleanup
 	s.pvTable = &PrincipalVariationTable{}
-	//pvNum := 0
-	//s.Clear()
 
 	// iterative deepening
 	for i := 1; i <= s.depth; i++ {
 		bestScore = s.AlphaBeta(p, math.Inf(-1), math.Inf(1), currentDepth, true)
-		//pvt := *s.pvTable
 		fmt.Printf("depth: %v, side: %v, score: %v, move: %v, nodes: %v", currentDepth, p.GetSide(), bestScore, bestMove.ShortString(), s.nodes)
 
 		for _, pvm := range pvMoves {
@@ -253,8 +236,4 @@ func (s *SearchInfo) SearchPosition(p *position.Position) {
 		}
 		fmt.Print("\n")
 	}
-
-	// for depth = 1 to maxDepth
-	// search AlphaBeta
-	// next depth
 }

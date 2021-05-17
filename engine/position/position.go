@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// undo tracks all data needed to revert the board to the previous state
 type undo struct {
 	move       Movekey
 	castlePerm castlePerm
@@ -14,6 +15,8 @@ type undo struct {
 	posKey     uint64
 }
 
+// Position is a given state of the board. The pieces field is the source of truth,
+// with other fields allowing for quick lookups via caching
 type Position struct {
 	pieces *board120 // Source of truth for pieces
 	side   int       // white/black
@@ -76,7 +79,7 @@ func (p *Position) GetSide() int {
 }
 
 // GenPosKey generates a statistically unique uint64
-// Key for the current state of the engine
+// for the current state of the position
 func (p Position) GenPosKey() uint64 {
 	var finalKey uint64 = 0
 	var pce Piece = Piece(0)
@@ -105,6 +108,7 @@ func (p Position) GenPosKey() uint64 {
 	return finalKey
 }
 
+// updateListCaches updates all piece caches based on pieces
 func (p *Position) updateListCaches() {
 	for i := 0; i < BOARD_SQ_NUMBER; i++ {
 		pce := p.pieces[i]
@@ -151,10 +155,14 @@ func (p *Position) updateListCaches() {
 	}
 }
 
-// will panic if the cache isn't right. used for debugging
+// AssertCache was used heavily during initial development,
+// but slows down computation by ~2x. It recalculates the cache
+// from scratch and asserts the existing cached values are as
+// they should be
 func (p *Position) AssertCache() error {
-	//todo - comment out
+	// Comment out if debugging
 	return nil
+
 	// temporary values we recompute to check against
 	t_pieceCount := [13]int{}
 	t_pieceList := [13][10]int{}

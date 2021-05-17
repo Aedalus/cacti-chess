@@ -25,7 +25,8 @@ non-contiguous range of 21-98.
 */
 type board120 [120]Piece
 
-// bitboard64 is a representation of just an 8x8
+// bitboard64 is a representation of just an 8x8 area,
+// used to quickly keep track of pawns
 type bitboard64 struct {
 	val uint64
 }
@@ -37,7 +38,7 @@ func (b *bitboard64) has(index int) bool {
 	return (b.val & (1 << index)) != 0
 }
 
-// mapping indices from 120 <-> 64
+// mapping indices from 120 <-> 64 boards
 var sq120to64 = [120]int{}
 var sq64to120 = [64]int{}
 
@@ -47,26 +48,6 @@ func SQ120(sq64 int) int {
 
 func SQ64(sq120 int) int {
 	return sq120to64[sq120]
-}
-
-func (b bitboard64) Pop() int {
-	for i := 0; i < 64; i++ {
-		if b.has(i) {
-			b.clear(i)
-			return i
-		}
-	}
-	return -1
-}
-
-func (b bitboard64) Count() int {
-	c := 0
-	for i := 0; i < 64; i++ {
-		if b.has(i) {
-			c++
-		}
-	}
-	return c
 }
 
 func fileRankToSq(file int, rank int) int {

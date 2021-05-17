@@ -4,7 +4,6 @@ import "cacti-chess/engine/position"
 
 var perftCounts = map[string]int{}
 var perftSection string
-var perftSubmoves = map[string]string{}
 
 func perftRecursive(p *position.Position, totalDepth, depth int) int {
 
@@ -39,6 +38,11 @@ func perftRecursive(p *position.Position, totalDepth, depth int) int {
 	return childNodes
 }
 
+// Perft returns the total number of possible moves at a given depth.
+// The standard starting position has 20 possible moves for the first moves,
+// 400 possible moves for the response, etc. This is used to ensure the engine's
+// move generation matches established results, eliminating edge cases around
+// castling, en passant, etc.
 func Perft(p *position.Position, depth int) int {
 	return perftRecursive(p, depth, depth)
 }

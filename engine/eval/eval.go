@@ -2,18 +2,12 @@ package eval
 
 import "cacti-chess/engine/position"
 
-// EvalPosition returns the evaluation of a given
-// position in hundredths of a pawn. Always returns
-// the score as positive from the perspective of
-// the current side, even if black.
+type PositionEvaluator struct{}
 
-type PositionScorer struct{}
-
-func (s PositionScorer) Score(p *position.Position) float64 {
-	return evalPosition(p)
-}
-
-func evalPosition(p *position.Position) float64 {
+// Evaluate takes a position and returns a value based on the material
+// and positional advantages. A positive number is an advantage for
+// white, negative for black. Returned unit is in 100th of a pawn.
+func (s PositionEvaluator) Evaluate(p *position.Position) float64 {
 	// calculate initial material
 	material := p.GetMaterial()
 	pceCount := p.GetPieceCount()
@@ -72,10 +66,16 @@ func evalPosition(p *position.Position) float64 {
 		score -= rookTable[mirror64[position.SQ64(sq120)]]
 	}
 
-	// return relative to the player
+	return float64(score)
+}
+
+// EvaluateAbsolute returns the same evaluation as Evaluate, but will
+// always return a positive value even for black. This can be used
+// for negamax implementations of minimax
+func (s PositionEvaluator) EvaluateAbsolute(p *position.Position) float64 {
 	if p.GetSide() == position.WHITE {
-		return float64(score)
+		return s.Evaluate(p)
 	} else {
-		return -float64(score)
+		return -s.Evaluate(p)
 	}
 }
