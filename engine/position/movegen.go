@@ -5,6 +5,7 @@ import (
 	"strings"
 )
 
+// todo - kill this
 type Movescore struct {
 	Key   Movekey
 	Score int

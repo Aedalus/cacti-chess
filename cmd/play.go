@@ -48,14 +48,24 @@ var playCmd = &cli.Command{
 			// print the board
 			fmt.Println(p)
 
-			// player turn
+			// check for win conditions
+			if p.IsLegalMove() == false {
+				if p.IsStalemate() {
+					fmt.Println("Stalemate!")
+				} else if p.IsCheckmate() {
+					fmt.Println("Checkmate!")
+				}
+			}
+
+			// player/engine turn
 			if isPlayerTurn {
 				doPlayerTurn(p)
-				isPlayerTurn = !isPlayerTurn
 			} else {
 				doEngineTurn(p)
-				isPlayerTurn = !isPlayerTurn
 			}
+
+			// switch sides
+			isPlayerTurn = !isPlayerTurn
 
 		}
 		return nil

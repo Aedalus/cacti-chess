@@ -398,6 +398,34 @@ func (p *Position) IsKingAttacked() bool {
 	return p.IsSquareAttacked(p.kingSq[p.side], p.side^1)
 }
 
+func (p *Position) IsLegalMove() bool {
+	mlist := p.GenerateAllMoves()
+
+	legal := 0
+
+	for _, m := range *mlist {
+		if valid := p.MakeMove(m.Key); valid == true {
+			legal++
+			p.UndoMove()
+		}
+	}
+
+	return legal > 0
+}
+
+func (p *Position) IsStalemate() bool {
+	kingAttacked := p.IsKingAttacked()
+	legalMove := p.IsLegalMove()
+	return !kingAttacked && !legalMove
+}
+
+func (p *Position) IsCheckmate() bool {
+	kingAttacked := p.IsKingAttacked()
+	legalMove := p.IsLegalMove()
+
+	return kingAttacked && !legalMove
+}
+
 func (p Position) String() string {
 	output := strings.Builder{}
 	output.WriteString(p.PrintBoard())
