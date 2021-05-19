@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/urfave/cli/v2"
 	"log"
-	"math"
 	"os"
 	"strings"
 )
@@ -109,8 +108,7 @@ func doPlayerTurn(p *position.Position) {
 
 // doEngineTurn searches for the best move and then performs it
 func doEngineTurn(p *position.Position) {
-	search := search.New()
-	_, line := search.SearchPosition(p, search.Options{Depth: 4})
-	line := search.GetPrincipalVariationLine(p)
+	s := search.New()
+	_, line := s.SearchPosition(p, search.Options{Depth: 4})
 	p.MakeMove(line[0])
 }

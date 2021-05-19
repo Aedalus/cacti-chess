@@ -277,7 +277,6 @@ func (p *Position) MakeMove(move Movekey) bool {
 	// assert we're set up right
 	err = p.AssertCache()
 	if err != nil {
-		fmt.Errorf("woops!")
 		panic(err)
 	}
 
