@@ -11,6 +11,9 @@ import (
 const maxDepth = 128
 const mate = 29000 // score for mate
 
+var posInf = math.Inf(1)
+var negInf = math.Inf(-1)
+
 type SearchInfo struct {
 	start time.Time
 	stop  time.Time
@@ -26,8 +29,8 @@ type SearchInfo struct {
 	quit    bool // quit is set to true if forcefully exited
 	stopped bool // stopped is more graceful
 
-	fh  int // used to test alpha/beta efficiency
-	fhf int // used to test alpha/beta efficiency
+	fh  int
+	fhf int
 
 	// time controls
 	depthset  int // max depth
@@ -53,8 +56,6 @@ func (s *SearchInfo) Clear() {
 	// reset the search info
 	s.start = time.Time{}
 	s.stop = time.Time{}
-	s.depth = 0
-	s.nodes = 0
 
 	s.searchPly = 0
 	s.searchHistory = [13][120]int{}
@@ -64,22 +65,13 @@ func (s *SearchInfo) Clear() {
 	s.quit = false
 	s.stopped = false
 
-	// time controls
+	// limit controls
 	s.depthset = 0
 	s.timeset = 0
 	s.movestogo = 0
 	s.infinite = 0
-
-	s.fh = 0
-	s.fhf = 0
-}
-
-func (s *SearchInfo) GetPrincipalVariationLine(p *position.Position) []position.Movekey {
-	return s.pvTable.GetBestLine(p)
-}
-
-func (s *SearchInfo) GetPrincipalVariationTable() *PrincipalVariationTable {
-	return s.pvTable
+	s.depth = 0
+	s.nodes = 0
 }
 
 /*
@@ -186,10 +178,6 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 		// evaluate if this is better than what we've seen
 		if score > alpha {
 			if score >= beta {
-				if legal == 1 {
-					s.fhf++
-				}
-				s.fh++
 				return beta
 			}
 			alpha = score
@@ -216,24 +204,22 @@ func (s *SearchInfo) AlphaBeta(p *position.Position, alpha, beta float64, depth 
 	return alpha
 }
 
-func (s *SearchInfo) SearchPosition(p *position.Position) {
+type Options struct {
+	Depth int
+}
+
+func (s *SearchInfo) SearchPosition(p *position.Position, options Options) (bestScore float64, bestLine []position.Movekey) {
 
 	bestMove := position.Movekey(0)
-	bestScore := math.Inf(-1)
-	currentDepth := 0
-	var pvMoves []position.Movekey
 
-	// todo - cleanup
 	s.pvTable = &PrincipalVariationTable{}
 
 	// iterative deepening
-	for i := 1; i <= s.depth; i++ {
-		bestScore = s.AlphaBeta(p, math.Inf(-1), math.Inf(1), currentDepth, true)
-		fmt.Printf("depth: %v, side: %v, score: %v, move: %v, nodes: %v", currentDepth, p.GetSide(), bestScore, bestMove.ShortString(), s.nodes)
-
-		for _, pvm := range pvMoves {
-			fmt.Print(pvm)
-		}
-		fmt.Print("\n")
+	for i := 1; i <= options.Depth; i++ {
+		bestScore = s.AlphaBeta(p, negInf, posInf, i, true)
+		fmt.Printf("depth: %v, side: %v, score: %v, move: %v, nodes: %v\n", i, p.GetSide(), bestScore, bestMove.ShortString(), s.nodes)
 	}
+
+	bestLine = s.pvTable.GetBestLine(p)
+	return bestScore, bestLine
 }

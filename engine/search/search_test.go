@@ -44,9 +44,10 @@ func TestSearchInfo_SearchPosition(t *testing.T) {
 		require.Nil(t, err)
 
 		s := New()
-		val := s.AlphaBeta(p, math.Inf(-1), math.Inf(1), 3, false)
-		require.Equal(t, float64(-29000), val)
-		line := s.pvTable.GetBestLine(p)
+
+		val, line := s.SearchPosition(p, Options{Depth: 3})
+		assert.Equal(t, float64(-29000), val)
+
 		names := []string{}
 		for _, mv := range line {
 			names = append(names, mv.ShortString())
@@ -59,9 +60,8 @@ func TestSearchInfo_SearchPosition(t *testing.T) {
 		require.Nil(t, err)
 
 		s := New()
-		val := s.AlphaBeta(p, math.Inf(-1), math.Inf(1), 6, false)
+		val, line := s.SearchPosition(p, Options{Depth: 6})
 		assert.Equal(t, float64(29000), val)
-		line := s.pvTable.GetBestLine(p)
 		names := []string{}
 		for _, mv := range line {
 			names = append(names, mv.ShortString())
@@ -74,9 +74,8 @@ func TestSearchInfo_SearchPosition(t *testing.T) {
 		require.Nil(t, err)
 
 		s := New()
-		val := s.AlphaBeta(p, math.Inf(-1), math.Inf(1), 4, false)
+		val, line := s.SearchPosition(p, Options{Depth: 4})
 		assert.Equal(t, float64(29000), val)
-		line := s.pvTable.GetBestLine(p)
 		names := []string{}
 		for _, mv := range line {
 			names = append(names, mv.ShortString())
@@ -110,7 +109,6 @@ func TestSearchInfo_SearchPosition(t *testing.T) {
 			s.AlphaBeta(p, math.Inf(-1), math.Inf(1), 3, false)
 			line := s.pvTable.GetBestLine(p)
 			assert.Len(t, line, 3)
-
 		}
 	})
 }
