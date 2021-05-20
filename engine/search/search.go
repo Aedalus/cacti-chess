@@ -217,7 +217,7 @@ func (s *SearchInfo) SearchPosition(p *position.Position, options Options) (best
 	// iterative deepening
 	for i := 1; i <= options.Depth; i++ {
 		bestScore = s.AlphaBeta(p, negInf, posInf, i, true)
-		fmt.Printf("depth: %v, side: %v, score: %v, move: %v, nodes: %v\n", i, p.GetSide(), bestScore, bestMove.ShortString(), s.nodes)
+		fmt.Printf("info depth: %v, side: %v, score: %v, move: %v, nodes: %v\n", i, p.GetSide(), bestScore, bestMove.ShortString(), s.nodes)
 	}
 
 	bestLine = s.pvTable.GetBestLine(p)

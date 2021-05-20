@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"cacti-chess/engine/position"
+	"cacti-chess/engine/search"
 	"fmt"
 	"log"
 	"os"
@@ -14,23 +15,51 @@ import (
 // https://www.shredderchess.com/chess-features/uci-universal-chess-interface.html
 
 func main() {
+	//logfile := `C:\Users\TheAl\go\src\cacti-chess\logfile.txt`
+	//// open file read/write | create if not exist | clear file at open if exists
+	//f, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
+	//if err != nil {
+	//	panic(err)
+	//}
+
+	//// save original stdout, make multi writer
+	//out := os.Stdout
+	//mw := io.MultiWriter(out, f)
+	//
+	//// get pipe reader/writer
+	//r, w, _ := os.Pipe()
+	//os.Stdout = w
+	//os.Stderr = w
+	//
+	//// copy all reads from pipe to multiwriter, which writes to stdout and file
+	//go func(){
+	//	_, _ = io.Copy(mw, r)
+	//
+	//}()
+	//
+	//// set log file as well
+	//log.SetOutput(mw)
+
 	reader := bufio.NewReader(os.Stdin)
-	client := &UCIClient{}
+	client := &UCIClient{
+		search: search.New(),
+	}
 
 	for {
 		text, err := reader.ReadString('\n')
+		fmt.Printf("info input %q\n", text)
 		if err != nil {
 			log.Fatalf("error reading input: %v", err)
 		}
 
 		text = strings.TrimSpace(text)
-		log.Println("input:", text)
 		client.parseLine(text)
 	}
 }
 
 type UCIClient struct {
 	position *position.Position
+	search   *search.SearchInfo
 }
 
 func (c *UCIClient) parseLine(line string) {
@@ -81,7 +110,7 @@ func parseGoCmdArgs(segments []string) GoCmdArgs {
 		Winc:        0,
 		Binc:        0,
 		MovesToGo:   0,
-		Depth:       0,
+		Depth:       5,
 		Nodes:       0,
 		Mate:        0,
 		MoveTime:    0,
@@ -131,8 +160,15 @@ func parseGoCmdArgs(segments []string) GoCmdArgs {
 }
 
 func (c *UCIClient) parseGo(segments []string) {
-	//goCmdArgs := parseGoCmdArgs(segments)
+	goCmdArgs := parseGoCmdArgs(segments)
 
+	c.search = search.New()
+
+	_, line := c.search.SearchPosition(c.position, search.Options{
+		Depth: goCmdArgs.Depth,
+	})
+
+	fmt.Printf("bestmove %v\n", line[0].ShortString())
 }
 
 func (c *UCIClient) parsePosition(segments []string) {
@@ -146,7 +182,9 @@ func (c *UCIClient) parsePosition(segments []string) {
 	// parse fen/startingpos
 	if segments[1] == "startpos" {
 		fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-		moves = segments[2:]
+		if len(segments) > 2 {
+			moves = segments[3:]
+		}
 	} else if segments[1] == "fen" {
 		// fen has 6 parts
 		fen = strings.Join(segments[2:8], " ")
@@ -154,9 +192,6 @@ func (c *UCIClient) parsePosition(segments []string) {
 			moves = segments[9:]
 		}
 	}
-
-	fmt.Println(fen)
-	fmt.Println(moves)
 
 	// create the position
 	pos, err := position.FromFen(fen)
@@ -175,6 +210,4 @@ func (c *UCIClient) parsePosition(segments []string) {
 
 	// set as the active position
 	c.position = pos
-
-	fmt.Println(c.position)
 }

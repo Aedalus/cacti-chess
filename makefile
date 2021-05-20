@@ -30,4 +30,6 @@ build: ## Builds the binary
 	mkdir -p ./bin
 	cd cmd
 	go build -o ./bin/cacti-chess ./cmd
+	go build -o ./bin/cacti-chess-uci ./uci
 	chmod +x ./bin/cacti-chess
+	chmod +x ./bin/cacti-chess-uci

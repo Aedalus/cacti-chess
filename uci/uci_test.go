@@ -17,7 +17,7 @@ func Test_parseGoLine(t *testing.T) {
 			Winc:        0,
 			Binc:        0,
 			MovesToGo:   0,
-			Depth:       0,
+			Depth:       3,
 			Nodes:       0,
 			Mate:        0,
 			MoveTime:    0,
