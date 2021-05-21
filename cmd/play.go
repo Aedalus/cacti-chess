@@ -109,6 +109,6 @@ func doPlayerTurn(p *position.Position) {
 // doEngineTurn searches for the best move and then performs it
 func doEngineTurn(p *position.Position) {
 	s := search.New()
-	_, line := s.SearchPosition(p, search.Options{Depth: 4})
+	_, line := s.SearchPosition(p, search.Options{Depth: 5})
 	p.MakeMove(line[0])
 }
