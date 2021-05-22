@@ -10,6 +10,7 @@ allowing it to compute to deeper depths. Currently it can generate ~1 mil moves/
 
 There are some features not implemented that would help improve performance and evaluation.
 
+- Move Ordering - Impacts Alpha/Beta move speed
 - Transposition Tables - If we reach the same position two different ways, avoid duplicate computations after.
 - Quiescence Function - If the last move of a line was a capture, look a little farther than normal to avoid tactical tricks. Wait for things to 'Quiet' down.
 - Opening Books - Not needed for UCI GUIs, but makes the CLI version quite weak.
@@ -21,6 +22,7 @@ There are some features not implemented that would help improve performance and 
     - `perft` - Unit tests for millions and millions of chess positions to ensure move generation is working properly.
     - `position` - Models for the board/pieces/moves
     - `search` - AlphaBeta implementation to find the best line.
+- `lichess-bot` - Slightly modified version of https://github.com/dolegi/lichess-bot
 - `uci` - A UCI wrapper around the engine
   
 ## CLI
@@ -55,3 +57,8 @@ posKey: a4db34adbeab59f6
 The `uci` package implements a (semi) UCI compatible interface to the engine. The main commands of `position` and `go` work without issue, though it doesn't understand all time control params. It is far enough along that you can play it using a chess GUI. I recommend [the area gui](http://www.playwitharena.de/). You can compile the uci package, and install it using arena. From there, it will be used to play games.
 
 ![arena-img](./screenshots/arena-1.PNG)
+
+## Lichess Bot
+The `lichess-bot` package is a copy of https://github.com/dolegi/lichess-bot, which serves as a bridge between the UCI interface and Lichess API. It can be used to play games against the engine over lichess. A Lichess Bot API token is required to run.
+
+![lichess-image](./screenshots/lichess.png)

@@ -33,3 +33,9 @@ build: ## Builds the binary
 	go build -o ./bin/cacti-chess-uci ./uci
 	chmod +x ./bin/cacti-chess
 	chmod +x ./bin/cacti-chess-uci
+
+build-lichess: ## Builds the lichess docker image
+	docker build -f lichess.dockerfile . -t lichess-bot
+
+run-lichess: ## Run the lickess bot
+	go run ./lichess-bot lichess.toml

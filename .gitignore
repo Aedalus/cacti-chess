@@ -3,3 +3,4 @@
 bin/
 cover.out
 *.out
+/lichess.toml

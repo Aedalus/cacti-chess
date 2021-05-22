@@ -1,0 +1,22 @@
+# LICHESS_TOKEN should be replaces, and the file saved as lichess.toml
+token = "LICHESS_TOKEN"
+botname = "aedalus-bot"
+url = "https://lichess.org/api/"
+
+[engine]
+path = "./bin/cacti-chess-uci"
+#path = "stockfish"
+
+[challenge]
+variants = [
+    "standard"
+]
+speeds = [
+    "blitz",
+    "bullet",
+    "rapid",
+    "unlimited",
+]
+modes = [
+    "casual"
+]

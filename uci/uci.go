@@ -14,32 +14,17 @@ import (
 
 // https://www.shredderchess.com/chess-features/uci-universal-chess-interface.html
 
+var logFile *os.File
+
+func init() {
+	file, err := os.Create("uci.log")
+	if err != nil {
+		panic(err)
+	}
+	logFile = file
+}
 func main() {
-	//logfile := `C:\Users\TheAl\go\src\cacti-chess\logfile.txt`
-	//// open file read/write | create if not exist | clear file at open if exists
-	//f, err := os.OpenFile(logfile, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
-	//if err != nil {
-	//	panic(err)
-	//}
-
-	//// save original stdout, make multi writer
-	//out := os.Stdout
-	//mw := io.MultiWriter(out, f)
-	//
-	//// get pipe reader/writer
-	//r, w, _ := os.Pipe()
-	//os.Stdout = w
-	//os.Stderr = w
-	//
-	//// copy all reads from pipe to multiwriter, which writes to stdout and file
-	//go func(){
-	//	_, _ = io.Copy(mw, r)
-	//
-	//}()
-	//
-	//// set log file as well
-	//log.SetOutput(mw)
-
+	fmt.Fprintln(logFile, "starting")
 	reader := bufio.NewReader(os.Stdin)
 	client := &UCIClient{
 		search: search.New(),
@@ -47,7 +32,7 @@ func main() {
 
 	for {
 		text, err := reader.ReadString('\n')
-		fmt.Printf("info input %q\n", text)
+		//fmt.Printf("info input %q\n", text)
 		if err != nil {
 			log.Fatalf("error reading input: %v", err)
 		}
@@ -69,6 +54,7 @@ func (c *UCIClient) parseLine(line string) {
 	case "isready":
 		fmt.Println("readyok")
 	case "position":
+		fmt.Fprintln(logFile, strings.Join(segments, " "))
 		c.parsePosition(segments)
 	case "ucinewgame":
 		c.parsePosition([]string{"position", "startpos"})
@@ -168,6 +154,7 @@ func (c *UCIClient) parseGo(segments []string) {
 		Depth: goCmdArgs.Depth,
 	})
 
+	fmt.Fprintf(logFile, "found bestmove %s\n", line[0].ShortString())
 	fmt.Printf("bestmove %v\n", line[0].ShortString())
 }
 
